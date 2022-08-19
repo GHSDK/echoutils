@@ -15,6 +15,7 @@ class UtilsProvider : ContentProvider() {
     override fun onCreate(): Boolean {
         context?.applicationContext?.let {
             DataSave.init(it)
+            UiConfig.init(it)
         }
         return true
     }
