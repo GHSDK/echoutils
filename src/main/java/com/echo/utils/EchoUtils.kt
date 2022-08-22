@@ -45,7 +45,7 @@ object EchoUtils {
      * 网络图片不处理
      *
      * */
-    fun getContentFilePath(path: String, context: Context): Uri? {
+    fun getContentFilePath(path: String): Uri? {
         if (TextUtils.isEmpty(path)) {
             return null
         }
@@ -55,7 +55,7 @@ object EchoUtils {
         val imageFile = File(path)
         EchoLog.log("imageFile.exists()")
         val filePath = imageFile.absolutePath;
-        val cursor = context.contentResolver.query(
+        val cursor = getApplicationContext().contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             arrayOf(MediaStore.Images.Media._ID), MediaStore.Images.Media.DATA + "=? ",
             arrayOf(filePath), null
@@ -74,7 +74,7 @@ object EchoUtils {
             return if (imageFile.exists()) {
                 val values = ContentValues();
                 values.put(MediaStore.Images.Media.DATA, filePath);
-                context.contentResolver
+                getApplicationContext().contentResolver
                     .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
             } else {
                 null
@@ -90,7 +90,7 @@ object EchoUtils {
      * _id:405924  _data:/storage/emulated/0/DCIM/Camera/1640157624725.jpg  _size:null  _display_name:GameHours_1640157624704.png  mime_type:image/png  title:1640157624725  date_added:1640157624  date_modified:1640157624  description:null  picasa_id:null  isprivate:null  latitude:null  longitude:null  datetaken:1640157624000  orientation:null  mini_thumb_magic:907470628918643433  bucket_id:-1739773001  bucket_display_name:Camera  width:null  height:null  is_hidden:0  cshot_id:0  tagflags:0    _
      *目前发现id和_display_name可以用，就用_display_name
      */
-    fun getRealFilePath(uri: Uri, context: Context): String? {
+    fun getRealFilePath(uri: Uri): String? {
         val scheme = uri.scheme
         var data: String? = null
         if (scheme == null) data = uri.path else if (ContentResolver.SCHEME_FILE == scheme) {
@@ -98,7 +98,7 @@ object EchoUtils {
         } else if (ContentResolver.SCHEME_CONTENT == scheme) {
             var displayName = ""
             val cursor: Cursor? =
-                context.contentResolver.query(uri, null, null, null, null)
+                getApplicationContext().contentResolver.query(uri, null, null, null, null)
             cursor?.apply {
                 if (moveToFirst()) {
                     data = cursorGetString(this, MediaStore.Images.ImageColumns.DATA)
@@ -111,7 +111,7 @@ object EchoUtils {
                 close()
             }
             if (TextUtils.isEmpty(data) && !TextUtils.isEmpty(displayName)) {
-                val cursor2: Cursor? = context.contentResolver.query(
+                val cursor2: Cursor? = getApplicationContext().contentResolver.query(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                     arrayOf(MediaStore.Images.ImageColumns.DATA),
                     "${MediaStore.Images.ImageColumns.DISPLAY_NAME} = '$displayName'",
@@ -129,12 +129,33 @@ object EchoUtils {
         return data
     }
 
-    fun cursorGetString(cursor: Cursor, columnName: String): String? {
+    private fun cursorGetString(cursor: Cursor, columnName: String): String? {
         val index = cursor.getColumnIndex(columnName)
         if (index > -1) {
             return cursor.getString(index)
         }
         return null
+    }
+
+
+    /**
+     * 星号取代字符
+     * AAAAAAAAbb->AAAAAAAAAA**
+     * */
+    fun getStarReplace(s: String, num: Int): String {
+        if (TextUtils.isEmpty(s) || num < 1) {
+            return ""
+        }
+        return if (s.length < num) {
+            s
+        } else {
+            val sb = StringBuilder()
+            for (i in 0 until s.length - num) {
+                sb.append("*")
+            }
+            sb.append(s.substring(s.length - num))
+            sb.toString()
+        }
     }
 
 }

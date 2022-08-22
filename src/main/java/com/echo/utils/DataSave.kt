@@ -23,10 +23,13 @@ object DataSave {
     /**
      * 重写后用于区分身份id的数据存储
      * */
-    var getId: () -> String = { "" }
+    private var getId: () -> String = { "" }
 
+    fun setGetIDFun(theFun: () -> String) {
+        getId = theFun
+    }
 
-    var passwordAndName = Pair("wgsdkpassword", "wg_user_prefs")
+    private var passwordAndName = Pair("wgsdkpassword", "wg_user_prefs")
 
     fun setPasswordAndName(password: String, name: String) {
         passwordAndName = Pair(password, name)

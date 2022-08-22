@@ -1,6 +1,10 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package com.echo.utils
 
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -38,9 +42,13 @@ object EchoLog {
         logWitheECode(false, tag, *objects)
     }
 
+    @JvmStatic
+
     fun logECode(eCode: Boolean, vararg objects: Any?) {
         logWitheECode(eCode, tag, *objects)
     }
+
+    @JvmStatic
 
     fun logIf(show: Boolean, vararg objects: Any?) {
         if (!show) {
@@ -95,7 +103,7 @@ object EchoLog {
         logE(TAG, sb.toString())
     }
 
-
+    @JvmStatic
     fun logStackTrace(vararg objects: Any?) {
         if (!enableLog) {
             return
@@ -142,5 +150,35 @@ object EchoLog {
     private fun _logE(TAG: String, msg: String) {
         Log.e(TAG, msg)
         logover?.invoke(TAG, msg)
+    }
+
+
+    fun getLogViewString(
+        view: View?,
+        logSb: java.lang.StringBuilder? = null,
+        theDeep: String? = null,
+        times: Int = 0,
+    ): java.lang.StringBuilder {
+        if (times > 30) {
+            return StringBuilder("out of 30")
+        }
+        var sb = logSb ?: java.lang.StringBuilder()
+        var deep = theDeep ?: ""
+        if (view == null) {
+            return sb.append("\nview is null")
+        }
+        deep += "——"
+        sb.append("\n").append(deep).append(view.javaClass.simpleName)
+            .append(if (view.tag == null) "" else " " + view.tag)
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                sb = getLogViewString(view.getChildAt(i), sb, deep, times + 1)
+            }
+        }
+        return sb
+    }
+
+    fun logView(view: View?) {
+        log(getLogViewString(view).toString())
     }
 }

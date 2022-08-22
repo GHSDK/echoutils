@@ -13,6 +13,7 @@ import android.net.Uri
  */
 class UtilsProvider : ContentProvider() {
     override fun onCreate(): Boolean {
+        EchoLog.log("echo utils init")
         context?.applicationContext?.apply {
             EchoUtils.context = this
             UiConfig.init(this)
