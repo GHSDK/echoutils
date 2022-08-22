@@ -13,9 +13,9 @@ import android.net.Uri
  */
 class UtilsProvider : ContentProvider() {
     override fun onCreate(): Boolean {
-        context?.applicationContext?.let {
-            DataSave.init(it)
-            UiConfig.init(it)
+        context?.applicationContext?.apply {
+            EchoUtils.context = this
+            UiConfig.init(this)
         }
         return true
     }

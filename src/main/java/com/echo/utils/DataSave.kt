@@ -1,6 +1,5 @@
 package com.echo.utils
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.text.TextUtils
 import com.google.gson.Gson
@@ -21,12 +20,33 @@ object DataSave {
     //是否第一次打开
     val IS_FIRST_IN_BOOL = "IS_FIRST_IN_BOOL"
 
-    var sharedPreferences: SharedPreferences? = null
-
+    /**
+     * 重写后用于区分身份id的数据存储
+     * */
     var getId: () -> String = { "" }
 
-    internal fun init(context: Context) {
-        sharedPreferences = SecurePreferences(context, "wgsdkpassword", "wg_user_prefs")
+
+    var passwordAndName = Pair("wgsdkpassword", "wg_user_prefs")
+
+    fun setPasswordAndName(password: String, name: String) {
+        passwordAndName = Pair(password, name)
+    }
+
+    var key: Pair<SecurePreferences, Pair<String, String>>? = null
+
+    fun getSharedPreferences(): SharedPreferences {
+        key?.apply {
+            if (second == passwordAndName) {
+                return first
+            }
+        }
+        val spf = SecurePreferences(
+            EchoUtils.getApplicationContext(),
+            passwordAndName.first,
+            passwordAndName.second
+        )
+        key = Pair(spf, passwordAndName)
+        return spf
     }
 
     fun setID(id: () -> String) {
@@ -38,7 +58,7 @@ object DataSave {
     }
 
     fun save(title: String, string: String?) {
-        sharedPreferences?.edit()?.putString(
+        getSharedPreferences().edit()?.putString(
             title.setId(),
             string
         )?.apply()
@@ -46,28 +66,28 @@ object DataSave {
 
 
     fun save(title: String, long: Long) {
-        sharedPreferences?.edit()?.putLong(
+        getSharedPreferences().edit()?.putLong(
             title.setId(),
             long
         )?.apply()
     }
 
     fun save(title: String, boolean: Boolean) {
-        sharedPreferences?.edit()?.putBoolean(
+        getSharedPreferences().edit()?.putBoolean(
             title.setId(),
             boolean
         )?.apply()
     }
 
     fun save(title: String, float: Float) {
-        sharedPreferences?.edit()?.putFloat(
+        getSharedPreferences().edit()?.putFloat(
             title.setId(),
             float
         )?.apply()
     }
 
     fun save(title: String, int: Int) {
-        sharedPreferences?.edit()?.putInt(
+        getSharedPreferences().edit()?.putInt(
             title.setId(),
             int
         )?.apply()
@@ -79,15 +99,15 @@ object DataSave {
     }
 
     fun getBool(title: String, defValue: Boolean): Boolean {
-        return sharedPreferences?.getBoolean(title.setId(), defValue) ?: defValue
+        return getSharedPreferences().getBoolean(title.setId(), defValue) ?: defValue
     }
 
     fun getString(title: String, defValue: String = ""): String {
-        return sharedPreferences?.getString(title.setId(), defValue) ?: defValue
+        return getSharedPreferences().getString(title.setId(), defValue) ?: defValue
     }
 
     fun getLong(title: String, defValue: Long = 0): Long {
-        return sharedPreferences?.getLong(title.setId(), defValue) ?: defValue
+        return getSharedPreferences().getLong(title.setId(), defValue) ?: defValue
     }
 
     fun <T> getJsonObject(title: String, classOfT: Class<T>?): T? {
@@ -98,7 +118,7 @@ object DataSave {
     }
 
     fun isFirstOpen(): Boolean {
-        val value = sharedPreferences?.getBoolean(IS_FIRST_IN_BOOL, true) ?: true
+        val value = getSharedPreferences().getBoolean(IS_FIRST_IN_BOOL, true) ?: true
         save(IS_FIRST_IN_BOOL, false)
         return value
     }

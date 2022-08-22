@@ -33,6 +33,7 @@ object EchoLog {
     //规定每段显示的长度
     private const val LOG_MAX_LENGTH = 2 * 1024
 
+    @JvmStatic
     fun log(vararg objects: Any?) {
         logWitheECode(false, tag, *objects)
     }
