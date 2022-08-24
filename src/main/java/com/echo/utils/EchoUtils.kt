@@ -158,7 +158,7 @@ object EchoUtils {
                 sb.append("*")
             }
             sb.append(s.substring(s.length - num))
-            sb.toString()
+            sb.toMyString()
         }
     }
 

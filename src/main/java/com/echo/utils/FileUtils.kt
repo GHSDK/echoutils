@@ -22,7 +22,7 @@ object FileUtils {
             while (br.readLine().also { line = it } != null) {
                 sb.append(line)
             }
-            sb.toString()
+            sb.toMyString()
         } catch (e: IOException) {
             e.printStackTrace()
             ""

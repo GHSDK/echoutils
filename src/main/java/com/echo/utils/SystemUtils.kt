@@ -203,7 +203,7 @@ object SystemUtils {
                 if (res1.isNotEmpty()) {
                     res1.deleteCharAt(res1.length - 1)
                 }
-                return res1.toString()
+                return res1.toMyString()
             }
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
@@ -257,7 +257,7 @@ object SystemUtils {
                     values.putNull(MediaStore.MediaColumns.DATE_EXPIRES)
                     resolver.update(uri, values, null, null)
                 }
-                return uri.toString()
+                return uri.toMyString()
 
             } catch (e: IOException) {
                 resolver.delete(uri, null, null)

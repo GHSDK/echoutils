@@ -22,7 +22,7 @@ object TimeUtils {
      * */
     fun getTimeMillis(timeVar: Long): Long {
         var time = timeVar
-        val timeLen = time.toString().length
+        val timeLen = time.toMyString().length
         if (timeLen < TimeMillisLength) {
             time *= 10.0.pow(TimeMillisLength - timeLen).toLong()
         }

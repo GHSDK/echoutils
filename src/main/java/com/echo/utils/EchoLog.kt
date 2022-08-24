@@ -59,9 +59,9 @@ object EchoLog {
     fun Map<*, *>.toMapString(): String {
         val sb = StringBuilder()
         for (item in entries) {
-            sb.append(item.key.toString()).append(" :").append(item.value.toString()).append(";")
+            sb.append(item.key.toMyString()).append(" :").append(item.value.toMyString()).append(";")
         }
-        return sb.toString()
+        return sb.toMyString()
     }
 
     /**
@@ -84,7 +84,7 @@ object EchoLog {
         sb.append("║")
         for (o in objects) {
             if (o != null) {
-                var s = o.toString()
+                var s = o.toMyString()
                 if (o is Map<*, *>) {
                     s = o.toMapString()
                 }
@@ -98,7 +98,7 @@ object EchoLog {
             sb.append("___")
         }
         sb.append("\n╚═════════════════════════════════")
-        logE(TAG, sb.toString())
+        logE(TAG, sb.toMyString())
     }
 
     @JvmStatic
@@ -128,7 +128,7 @@ object EchoLog {
             sb.append("___")
         }
         sb.append("\n╚═════════════════════════════════")
-        logE("wgsdk", sb.toString())
+        logE("wgsdk", sb.toMyString())
     }
 
     fun logE(TAG: String, msg: String) {
@@ -177,6 +177,6 @@ object EchoLog {
     }
 
     fun logView(view: View?) {
-        log(getLogViewString(view).toString())
+        log(getLogViewString(view).toMyString())
     }
 }
