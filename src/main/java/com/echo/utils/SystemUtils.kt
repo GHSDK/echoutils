@@ -5,12 +5,17 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ContentValues
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.text.TextUtils
+import android.text.format.DateUtils
 import android.view.Window
 import android.view.inputmethod.InputMethodManager
 import androidx.core.app.ActivityCompat
@@ -116,7 +121,7 @@ object SystemUtils {
      *
      */
     fun copyStringToClipboard(copyStr: String?, label: String = "Label"): Boolean {
-        if(TextUtils.isEmpty(copyStr)){
+        if (TextUtils.isEmpty(copyStr)) {
             return false
         }
         return try {
@@ -204,5 +209,64 @@ object SystemUtils {
             e.printStackTrace()
         }
         return "02:00:00:00:00:00"
+    }
+
+
+    //保存图片，返回content：
+    fun saveImageToGallery(context: Context, image: Bitmap, picTitle: String? = ""): String? {
+        val mImageTime = System.currentTimeMillis()
+        val mImageFileName =
+            if (TextUtils.isEmpty(picTitle)) "GameHours_$mImageTime.png" else picTitle
+        val values = ContentValues()
+        values.put(MediaStore.MediaColumns.DISPLAY_NAME, mImageFileName)
+        values.put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+        values.put(MediaStore.MediaColumns.DATE_ADDED, mImageTime / 1000)
+        values.put(MediaStore.MediaColumns.DATE_MODIFIED, mImageTime / 1000)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            values.put(
+                MediaStore.MediaColumns.DATE_EXPIRES,
+                (mImageTime + DateUtils.DAY_IN_MILLIS) / 1000
+            )
+            values.put(MediaStore.MediaColumns.IS_PENDING, 1)
+            values.put(
+                MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES
+                        + File.separator + "GameHours"
+            )
+        }
+        val resolver = context.contentResolver
+        val uri = try {
+            //Caused by java.lang.IllegalArgumentException: Unknown URL content://media/external/images/media 可能是有的机器改了这个东西
+            resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            EchoLog.log(e.message)
+            return null
+        }
+        uri?.apply {
+            try {
+                // First, write the actual data for our screenshot
+                resolver.openOutputStream(uri).use { out ->
+                    if (!image.compress(Bitmap.CompressFormat.PNG, 100, out)) {
+                        throw IOException("Failed to compress")
+                    }
+                }
+                // Everything went well above, publish it!
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    values.clear()
+                    values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                    values.putNull(MediaStore.MediaColumns.DATE_EXPIRES)
+                    resolver.update(uri, values, null, null)
+                }
+                return uri.toString()
+
+            } catch (e: IOException) {
+                resolver.delete(uri, null, null)
+                EchoLog.log(e.message)
+                e.printStackTrace()
+                return null
+            }
+        }
+        return null
+
     }
 }

@@ -31,8 +31,8 @@ object EchoLog {
 
 
     private var logover: ((String, String) -> Unit)? = null
-    private var tag: String = "EchoLog"
-    private var enableLog: Boolean = true
+    var tag: String = "EchoLog"
+    var enableLog: Boolean = true
 
     //规定每段显示的长度
     private const val LOG_MAX_LENGTH = 2 * 1024
@@ -43,13 +43,11 @@ object EchoLog {
     }
 
     @JvmStatic
-
     fun logECode(eCode: Boolean, vararg objects: Any?) {
         logWitheECode(eCode, tag, *objects)
     }
 
     @JvmStatic
-
     fun logIf(show: Boolean, vararg objects: Any?) {
         if (!show) {
             return

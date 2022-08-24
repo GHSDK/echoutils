@@ -1,5 +1,8 @@
 package com.echo.utils
 
+import android.app.Activity
+import android.graphics.Bitmap
+import android.os.Build
 import android.text.TextUtils
 import java.io.*
 
@@ -90,4 +93,30 @@ object FileUtils {
         }
         return false
     }
+
+    /**
+     *
+     * 把图片保存在本地
+     * 1s超时放弃，返回空字符
+     * @return String 返回“content://”类型的地址
+     * @param noGranted 未取得保存权限，参数含义为，是否用户选择了是否不再询问
+     * */
+    suspend fun saveBitmap(
+        bitmap: Bitmap,
+        activity: Activity,
+        noGranted: ((Boolean) -> Unit)? = null
+    ): String? {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            return SystemUtils.saveImageToGallery(activity, bitmap)
+        }
+        val ans = EmptyFragmentActivity.askForWriteExternalStorage(activity)
+        if (ans.first) {
+            return SystemUtils.saveImageToGallery(activity, bitmap)
+        } else {
+            noGranted?.invoke(ans.second)
+        }
+        return null
+    }
+
 }
+

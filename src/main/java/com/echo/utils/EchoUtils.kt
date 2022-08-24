@@ -10,7 +10,11 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
 import android.text.TextUtils
+import android.widget.Toast
+import com.squareup.picasso.Picasso
+import kotlinx.coroutines.withTimeout
 import java.io.File
+import java.lang.ref.WeakReference
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -156,6 +160,50 @@ object EchoUtils {
             sb.append(s.substring(s.length - num))
             sb.toString()
         }
+    }
+
+
+    var toastWeakReference: WeakReference<Toast>? = null
+
+    /**
+     * Toast 提示框
+     *
+     * @param context
+     * @param content
+     */
+    fun showToast(content: String?) {
+        val toast: Toast = toastWeakReference?.get() ?: Toast.makeText(
+            getApplicationContext(),
+            content,
+            Toast.LENGTH_SHORT
+        ).apply {
+            setText(content)
+            show()
+        }
+        if (toastWeakReference?.get() == null) {
+            toastWeakReference = WeakReference(toast)
+        }
+    }
+
+
+    /**
+     * 如果是网络图片，就下载到本地，返回"content://"
+     * 如果不是网络图片，直接返回，不处理
+     * */
+    suspend fun getHttpImageToLocal(image: String, activity: Activity): String {
+        if (!image.startsWith("http")) {
+            return image
+        }
+        var ans = ""
+        try {
+            withTimeout(3000) {
+                ans = FileUtils.saveBitmap(Picasso.get().load(image).get(), activity) ?: ""
+            }
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            EchoLog.log(e.message)
+        }
+        return ans
     }
 
 }
