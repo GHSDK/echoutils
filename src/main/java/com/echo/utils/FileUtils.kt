@@ -1,9 +1,16 @@
 package com.echo.utils
 
+import android.Manifest
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
 import android.text.TextUtils
+import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.*
 
 /**
@@ -109,13 +116,59 @@ object FileUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             return SystemUtils.saveImageToGallery(activity, bitmap)
         }
-        val ans = EmptyFragmentActivity.askForWriteExternalStorage(activity)
+        val ans = askForWriteExternalStorage(activity)
         if (ans.first) {
             return SystemUtils.saveImageToGallery(activity, bitmap)
         } else {
             noGranted?.invoke(ans.second)
         }
         return null
+    }
+
+
+    /**
+     * 索取保存图片权限
+     * @return first 是否权限允许，second 当不允许时，用户是否选择了不再询问
+     * */
+    suspend fun askForWriteExternalStorage(activity: Activity): Pair<Boolean, Boolean> {
+        EchoLog.log("  askForWriteExternalStorage  ")
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+            ContextCompat.checkSelfPermission(
+                activity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            return Pair(true, true)
+        }
+        val ans = suspendCancellableCoroutine<Boolean> {
+            if (activity is ComponentActivity) {
+                activity.activityResultRegistry.register(
+                    this.hashCode().toString(), ActivityResultContracts.RequestPermission()
+                ) { isOk ->
+                    it.resumeWith(Result.success(isOk))
+                }.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            } else {
+                EmptyFragmentActivity.invoke(
+                    activity, { appCompatActivity ->
+                        EchoLog.log("  requestPermissions  ")
+                        appCompatActivity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isOk ->
+                            it.resumeWith(Result.success(isOk))
+                            appCompatActivity.finish()
+                        }.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    }
+                )
+            }
+        }
+        if (!ans) {
+            val shouldShowRequestPermissionRationale =
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    activity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+            return Pair(false, shouldShowRequestPermissionRationale)
+        }
+        return Pair(true, true)
     }
 
 }

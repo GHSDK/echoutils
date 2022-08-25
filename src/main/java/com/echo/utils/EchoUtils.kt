@@ -242,4 +242,21 @@ fun <I, O> ComponentActivity.myRegisterForActivityResult(
 }
 
 
+fun <T> List<T>?.getSafeItem(index: Int): T? {
+    if (index < 0) {
+        return null
+    }
+    this?.apply {
+        if (index < size) {
+            return get(index)
+        }
+    }
+    return null
+}
+
+fun String.isNotEmptyAndDo(action: (String) -> Unit) {
+    if (this.isNotEmpty()) {
+        action.invoke(this)
+    }
+}
 
