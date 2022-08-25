@@ -5,9 +5,11 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -15,6 +17,9 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.lang.ref.SoftReference
 
@@ -111,9 +116,11 @@ class EmptyFragmentActivity : AppCompatActivity() {
             }
             val ans = suspendCancellableCoroutine<Boolean> {
                 if (activity is ComponentActivity) {
-                    activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isOk ->
+                    activity.activityResultRegistry.register(
+                        this.hashCode().toString(), ActivityResultContracts.RequestPermission()
+                    ) { isOk ->
                         it.resumeWith(Result.success(isOk))
-                    }
+                    }.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 } else {
                     invoke(
                         activity, { appCompatActivity ->
@@ -137,9 +144,77 @@ class EmptyFragmentActivity : AppCompatActivity() {
             return Pair(true, true)
         }
 
+
+        //https://blog.csdn.net/xietansheng/article/details/115763279
+        private fun getPickIntent(multiple: Boolean = false): Intent {
+            val picker = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            picker.type = "image/*"
+            picker.addCategory(Intent.CATEGORY_OPENABLE);
+            picker.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
+            picker.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, multiple)
+            picker.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
+            return picker
+        }
+
+        private fun getPicAns(resultCode: Int, intent: Intent?): List<Uri?> {
+            val ans = ArrayList<Uri?>()
+            intent?.apply {
+                if ((clipData?.itemCount ?: 0) > 0) {
+                    clipData?.apply {
+                        for (i in 0 until itemCount) {
+                            ans.add(getItemAt(i).uri)
+                        }
+                    }
+                } else {
+                    ans.add(data)
+                }
+            }
+            return ans
+        }
+
+        private suspend fun launchComponentActivity(
+            activity: ComponentActivity,
+            multiple: Boolean = false
+        ): List<Uri?> {
+            val ans = suspendCancellableCoroutine<List<Uri?>> {
+                activity.myRegisterForActivityResult(object :
+                    ActivityResultContract<Boolean, List<Uri?>>() {
+                    override fun createIntent(context: Context, input: Boolean): Intent {
+                        return getPickIntent(input)
+                    }
+
+                    override fun parseResult(resultCode: Int, intent: Intent?): List<Uri?> {
+                        return getPicAns(resultCode, intent)
+                    }
+                }) { thePicList ->
+                    it.resumeWith(Result.success(thePicList))
+                }.launch(multiple)
+            }
+            return ans
+        }
+
+
+        /**
+         * 拉起图片选择框
+         *
+         * */
+        @OptIn(DelicateCoroutinesApi::class)
+        suspend fun pickerShare2(activity: Activity, multiple: Boolean = false): List<Uri?> {
+            return if (activity is ComponentActivity) {
+                launchComponentActivity(activity, multiple)
+            } else {
+                return   suspendCancellableCoroutine { cancellableContinuation ->
+                    invoke(activity,
+                        {
+                            GlobalScope.launch {
+                                cancellableContinuation.resumeWith(
+                                    Result.success(launchComponentActivity(it, multiple))
+                                )
+                                it.finish()
+                            }
+                        })
+                }
+            }
+        }
     }
-
-
-
-
 }

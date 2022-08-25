@@ -11,6 +11,10 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.withTimeout
 import java.io.File
@@ -215,5 +219,27 @@ fun Any?.toMyString(nullValue: String = ""): String {
     }
     return this.toString()
 }
+
+fun CharSequence?.isNullOrEmpty(): Boolean {
+    this?.apply {
+        return isEmpty() || "null".equals(this.toString(), true)
+    }
+    return true
+}
+
+/**
+ * 在oncreat以外的地方RegisterForActivityResult
+ * */
+fun <I, O> ComponentActivity.myRegisterForActivityResult(
+    contract: ActivityResultContract<I, O>,
+    callback: ActivityResultCallback<O>
+): ActivityResultLauncher<I> {
+    return activityResultRegistry.register(
+        System.currentTimeMillis().toString(),
+        contract,
+        callback
+    )
+}
+
 
 
