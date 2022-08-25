@@ -59,7 +59,8 @@ object EchoLog {
     fun Map<*, *>.toMapString(): String {
         val sb = StringBuilder()
         for (item in entries) {
-            sb.append(item.key.toMyString()).append(" :").append(item.value.toMyString()).append(";")
+            sb.append(item.key.toMyString()).append(" :").append(item.value.toMyString())
+                .append(";")
         }
         return sb.toMyString()
     }

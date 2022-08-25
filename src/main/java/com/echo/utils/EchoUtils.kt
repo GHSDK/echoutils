@@ -206,4 +206,14 @@ object EchoUtils {
         return ans
     }
 
+
 }
+
+fun Any?.toMyString(nullValue: String = ""): String {
+    if (this == null) {
+        return nullValue
+    }
+    return this.toString()
+}
+
+
