@@ -15,10 +15,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
+import com.echo.utils.coverx.ActivityLifeCycleOwner
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
 import java.io.File
 import java.lang.ref.WeakReference
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -254,9 +259,70 @@ fun <T> List<T>?.getSafeItem(index: Int): T? {
     return null
 }
 
-fun String.isNotEmptyAndDo(action: (String) -> Unit) {
-    if (this.isNotEmpty()) {
-        action.invoke(this)
+fun String?.isNotEmptyAndDo(action: (String) -> Unit) {
+    this?.apply {
+        if (this.isNotEmpty()) {
+            action.invoke(this)
+        }
     }
 }
+
+fun Boolean?.isTrueAndRun(action: () -> Unit) {
+    if (this == true) {
+        action.invoke()
+    }
+}
+
+fun Activity.getCoroutineScope(): CoroutineScope {
+    if (this is ComponentActivity) {
+        return this.lifecycleScope
+    }
+    return ActivityLifeCycleOwner(this).lifecycle.coroutineScope
+}
+
+fun Activity.launch(
+    context: CoroutineContext = EmptyCoroutineContext,
+    start: CoroutineStart = CoroutineStart.DEFAULT,
+    block: suspend CoroutineScope.() -> Unit
+): Job {
+    return this.getCoroutineScope().launch(context, start, block)
+}
+
+/**
+ * 如果是类型T 执行action，如果不是就执行no
+ * */
+inline fun <reified T, out> Any?.isAndGet2(
+    yes: (T) -> out,
+    no: (Any?) -> out? = { null }
+): out? {
+    return if (this is T) {
+        yes.invoke(this as T)
+    } else {
+        no.invoke(this)
+    }
+}
+
+inline fun <reified T, out> Any?.isAndGet(
+    yes: (T) -> out
+): out? {
+    return if (this is T) {
+        yes.invoke(this as T)
+    } else {
+        null
+    }
+}
+
+inline fun <reified T> Any?.isAndPerform(
+    yes: (T) -> Unit,
+    no: (Any?) -> Unit = {}
+) {
+    if (this is T) {
+        yes.invoke(this as T)
+    } else {
+        no.invoke(this)
+    }
+}
+
+
+
 

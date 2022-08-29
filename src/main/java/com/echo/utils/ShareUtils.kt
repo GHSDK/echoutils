@@ -9,7 +9,6 @@ import android.net.Uri
 import android.text.TextUtils
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
- import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -30,10 +29,10 @@ object ShareUtils {
      *
      */
     fun lineShareImage(activity: Activity, imageUri: String?) {
-        GlobalScope.launch {
+        activity.launch {
             var image = imageUri ?: ""
             if (TextUtils.isEmpty(image)) {
-                image = pickerShare(activity).getSafeItem(0).toMyString()
+                image = pickerImage(activity).getSafeItem(0).toMyString()
             }
             if (TextUtils.isEmpty(image)) {
                 return@launch
@@ -53,7 +52,7 @@ object ShareUtils {
     }
 
     fun lineShareImage(activity: Activity, bitmap: Bitmap?) {
-        GlobalScope.launch {
+        activity.launch {
             var url: String? = null
             bitmap?.apply {
                 url = FileUtils.saveBitmap(bitmap, activity)
@@ -124,15 +123,14 @@ object ShareUtils {
      * 拉起图片选择框
      *
      * */
-    @OptIn(DelicateCoroutinesApi::class)
-    suspend fun pickerShare(activity: Activity, multiple: Boolean = false): List<Uri?> {
+    suspend fun pickerImage(activity: Activity, multiple: Boolean = false): List<Uri?> {
         return if (activity is ComponentActivity) {
             launchComponentActivity(activity, multiple)
         } else {
             return suspendCancellableCoroutine { cancellableContinuation ->
                 EmptyFragmentActivity.invoke(activity,
                     {
-                        GlobalScope.launch {
+                        activity.launch {
                             cancellableContinuation.resumeWith(
                                 Result.success(launchComponentActivity(it, multiple))
                             )
@@ -140,7 +138,7 @@ object ShareUtils {
                         }
                     })
             }
-        }
+//        }
     }
 
 }
