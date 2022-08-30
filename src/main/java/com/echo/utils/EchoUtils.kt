@@ -215,7 +215,13 @@ object EchoUtils {
         return ans
     }
 
+    fun isNullList(list: List<*>?): Boolean {
+        return list?.isEmpty() ?: true
+    }
+}
 
+fun List<*>?.isNullList(): Boolean {
+    return this?.isEmpty() ?: true
 }
 
 fun Any?.toMyString(nullValue: String = ""): String {

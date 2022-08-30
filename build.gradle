@@ -2,7 +2,12 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
 }
-
+def gitCommitHash = 'git log  -1 --pretty="%H"'.execute([], project.rootDir).text.trim()
+def gitLog = new String('git log  -1 --pretty="%s"'.execute([], project.rootDir).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
+def branch = new String('git branch --show-current'.execute([], project.rootDir).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
+def time = new Date().format("yyyy-MM-dd HH:mm:ss").toString()
+def theVersionNameCode = '0.0.1'
+def theVersionName = 'echo.utils.' + theVersionNameCode
 android {
     compileSdk 32
 
@@ -12,6 +17,12 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+
+        buildConfigField "String", "build_time", "\"$time\""
+        buildConfigField "String", "build_branch", "\"$branch\""
+        buildConfigField "String", "build_sha", "\"$gitCommitHash\""
+        buildConfigField "String", 'VERSION_CODE', "\"$theVersionCode\""
+        buildConfigField 'String', 'VERSION_NAME', "\"$theVersionName\""
     }
 
     buildTypes {
@@ -43,4 +54,43 @@ dependencies {
 
     implementation 'androidx.activity:activity-ktx:1.4.0'
 
+    compileOnly 'com.facebook.android:facebook-share:13.0.0'
+
+}
+
+//***************************** 打包发布 *****************************************
+apply plugin: 'maven-publish'
+def GITHUB_REPO_PATH = "../maven/"
+///说明文档
+def DESCRIPTION = '2022/8/30 第一版'
+def VERSION = theVersionNameCode + '-beta0.1'
+//Executing tasks: [publishMainPublicationToMavenRepository] in project E:\workdata\SDK\Gh_TW\twsdk
+afterEvaluate {
+
+    publishing {
+        repositories {
+            maven {
+                url = "file://${file(GITHUB_REPO_PATH).absolutePath}"
+            }
+        }
+        publications {
+            Main(MavenPublication) {
+                // The following applies a component to this publication
+                // which results in publishing an app bundle.
+                from components.release
+                groupId = 'com.echo'
+                artifactId = 'utils'
+                version = VERSION
+                pom {
+                    description = DESCRIPTION
+                    properties = [
+                            'git-Log'       : gitLog,
+                            'git-branch'    : branch,
+                            'git-CommitHash': gitCommitHash,
+                            'build-time'    : time
+                    ]
+                }
+            }
+        }
+    }
 }

@@ -9,5 +9,9 @@
             android:exported="true" />
         <activity android:name=".EmptyFragmentActivity" />
     </application>
-
+    <queries>
+        <package android:name="com.twitter.android" />
+        <package android:name="com.facebook.katana" />
+        <provider android:authorities="com.facebook.katana.provider.PlatformProvider" />
+    </queries>
 </manifest>

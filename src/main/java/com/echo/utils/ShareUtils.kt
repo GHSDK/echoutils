@@ -9,8 +9,14 @@ import android.net.Uri
 import android.text.TextUtils
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContract
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import androidx.annotation.Keep
+import androidx.fragment.app.FragmentActivity
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.share.Sharer
+import com.facebook.share.model.*
+import com.facebook.share.widget.ShareDialog
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
@@ -139,5 +145,115 @@ object ShareUtils {
                     })
             }
         }
+    }
+
+
+    private val callbackManager = CallbackManager.Factory.create()
+
+    fun fbShareLink(
+        activity: Activity,
+        url: String?,
+        quote: String? = null,
+        callback: ShareCallBack?
+    ) {
+        if (TextUtils.isEmpty(url)) {
+            fbSharePick(activity, callback)
+            return
+        }
+        val content: ShareContent<*, *> = ShareLinkContent.Builder()
+            .setContentUrl(Uri.parse(url))
+            .setQuote(quote)
+            .build()
+        fbShare(activity, content, callback)
+    }
+
+    fun fbShareMedia(
+        activity: Activity,
+        images: List<String?>?,
+        videos: List<String?>?,
+        bitmap: List<Bitmap?>?,
+        callback: ShareCallBack?
+    ) {
+        EchoLog.log(activity, images, videos, bitmap, callback)
+        if (images.isNullList()
+            && videos.isNullList()
+            && bitmap.isNullList()
+        ) {
+            fbSharePick(activity, callback)
+            return
+        }
+        val content = ShareMediaContent.Builder()
+        images?.forEach {
+            it?.apply {
+                if (TextUtils.isEmpty(it)) {
+                    return@apply
+                }
+                content.addMedium(SharePhoto.Builder().setImageUrl(Uri.parse(it)).build())
+            }
+        }
+        bitmap?.forEach {
+            it?.apply {
+                content.addMedium(SharePhoto.Builder().setBitmap(it).build())
+            }
+        }
+        videos?.forEach {
+            it?.apply {
+                if (TextUtils.isEmpty(it)) {
+                    return@apply
+                }
+                content.addMedium(ShareVideo.Builder().setLocalUrl(Uri.parse(it)).build())
+            }
+        }
+        fbShare(activity, content.build(), callback)
+    }
+
+    fun fbSharePick(activity: Activity, callback: ShareCallBack?) {
+        activity.launch {
+            val images = pickerImage(activity)
+            if (!images.isNullList()) {
+                fbShareMedia(activity, images.map { it.toString() }, null, null, callback)
+            }
+        }
+    }
+
+    fun fbShare(activity: Activity, content: ShareContent<*, *>, callback: ShareCallBack?) {
+        EchoLog.log(content, callback)
+        if (callback == null) {
+            ShareDialog(activity).show(content)
+            return
+        }
+        val facebookCallback = object : FacebookCallback<Sharer.Result> {
+            override fun onSuccess(result: Sharer.Result) {
+                callback.onSuccess(result.toString())
+            }
+
+            override fun onCancel() {
+                callback.onCancel()
+            }
+
+            override fun onError(error: FacebookException) {
+                callback.onError(error)
+            }
+        }
+        EmptyFragmentActivity.invoke(
+            activity,
+            { fragmentActivity: FragmentActivity ->
+                val shareDialog = ShareDialog(fragmentActivity)
+                shareDialog.registerCallback(callbackManager, facebookCallback)
+                shareDialog.show(content)
+            }
+        ) { fragmentActivity: FragmentActivity, requestCode: Int, resultCode: Int, data: Intent? ->
+            //监听必须添加这个 （ 这个设计真是奇葩。自己在内部处理不好，非要让使用者来搞。）
+            callbackManager.onActivityResult(requestCode, resultCode, data)
+            fragmentActivity.finish()
+        }
+    }
+
+
+    @Keep
+    interface ShareCallBack {
+        fun onSuccess(result: String?)
+        fun onCancel()
+        fun onError(error: Throwable?)
     }
 }

@@ -4,6 +4,7 @@ import android.content.ContentProvider
 import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -13,7 +14,14 @@ import android.net.Uri
  */
 class UtilsProvider : ContentProvider() {
     override fun onCreate(): Boolean {
-        EchoLog.log("echo utils init")
+        EchoLog.log(
+            "echo utils init:", Build.VERSION.SDK_INT,
+            "\nVERSION_CODE:", BuildConfig.VERSION_CODE,
+            "\nVERSION_NAME:", BuildConfig.VERSION_NAME,
+            "\nBUILD_TIME:", BuildConfig.build_time,
+            "\nBRANCH:", BuildConfig.build_branch,
+            "\nSHA:", BuildConfig.build_sha,
+        )
         context?.applicationContext?.apply {
             EchoUtils.context = this
             UiConfig.init(this)
