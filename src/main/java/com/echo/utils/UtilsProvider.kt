@@ -14,6 +14,12 @@ import android.os.Build
  */
 class UtilsProvider : ContentProvider() {
     override fun onCreate(): Boolean {
+        context?.applicationContext?.apply {
+            EchoLog.setLogTag(getString(R.string.echo_log_tag))
+            EchoLog.log(applicationInfo.metaData)
+            EchoUtils.context = this
+            UiConfig.init(this)
+        }
         EchoLog.log(
             "echo utils init:", Build.VERSION.SDK_INT,
             "\nVERSION_CODE:", BuildConfig.VERSION_CODE,
@@ -22,10 +28,6 @@ class UtilsProvider : ContentProvider() {
             "\nBRANCH:", BuildConfig.build_branch,
             "\nSHA:", BuildConfig.build_sha,
         )
-        context?.applicationContext?.apply {
-            EchoUtils.context = this
-            UiConfig.init(this)
-        }
         return true
     }
 

@@ -14,4 +14,5 @@
         <package android:name="com.facebook.katana" />
         <provider android:authorities="com.facebook.katana.provider.PlatformProvider" />
     </queries>
+
 </manifest>

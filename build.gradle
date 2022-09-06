@@ -23,6 +23,7 @@ android {
         buildConfigField "String", "build_sha", "\"$gitCommitHash\""
         buildConfigField "String", 'VERSION_CODE', "\"$theVersionCode\""
         buildConfigField 'String', 'VERSION_NAME', "\"$theVersionName\""
+        resValue("string", "echo_log_tag", "EchoLog")
     }
 
     buildTypes {

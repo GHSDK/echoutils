@@ -5,6 +5,9 @@ package com.echo.utils
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -23,15 +26,33 @@ object EchoLog {
         enableLog = boolean
     }
 
+    fun setTraceCount(count: Int) {
+        if (traceCount != count) {
+            log("setTraceCount count")
+            traceCount = count
+        }
+    }
+
 
     fun setLogOver(theLogOver: ((String, String) -> Unit)?) {
         log(theLogOver)
         logover = theLogOver
     }
 
+    /**
+     *避免打印一些封装类
+     * */
+    fun addIgnore(string: String) {
+        if (ignore.contains(string)) {
+            return
+        }
+        ignore.add(string)
+    }
 
     private var logover: ((String, String) -> Unit)? = null
     var tag: String = "EchoLog"
+
+    var ignore: ArrayList<String> = arrayListOf(EchoLog::class.java.name)
     var enableLog: Boolean = true
 
     //规定每段显示的长度
@@ -73,16 +94,74 @@ object EchoLog {
         if (!enableLog) {
             return
         }
+        myLog(eCode = eCode, TAG = TAG, objects = objects)
+    }
+
+
+    @JvmStatic
+    fun logStackTrace(vararg objects: Any?) {
+        if (!enableLog) {
+            return
+        }
+        myLog(all = true, objects = objects)
+    }
+
+    private var traceCount = 2
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun myLog(
+        eCode: Boolean = false,
+        TAG: String = tag,
+        all: Boolean = false,
+        vararg objects: Any?
+    ) {
+        val t = Throwable()
+        val th = Thread.currentThread()
         val sb = StringBuilder()
-        val a = Throwable()
-        val traceElement = a.stackTrace
-        sb.append(" \n╔═════════════════════════════════")
-        sb.append("\n║➨➨at ")
-        sb.append(traceElement[2])
-        sb.append("\n║➨➨➨➨at ")
-        sb.append(traceElement[3])
-        sb.append("\n╟───────────────────────────────────\n")
-        sb.append("║")
+        GlobalScope.launch {
+            sb.append(" \n╔═══${th.name}:${th.id}════════════════════════════")
+            var jiantou = "➨"
+            var count = if (all) 100 else traceCount
+            out@ for (traceElement1 in t.stackTrace) {
+                if (count <= 0) {
+                    break
+                }
+                for (v in ignore) {
+                    if (traceElement1.toString().contains(v)) {
+                        continue@out
+                    }
+                }
+                count--
+                jiantou = "$jiantou➨"
+                sb.append("\n║")
+                sb.append(jiantou)
+                sb.append("at ")
+                sb.append(traceElement1)
+            }
+            sb.append("\n╟───────────────────────────────────\n")
+            sb.append("║")
+            for (o in objects) {
+                if (o != null) {
+                    var s = o.toMyString()
+                    if (o is Map<*, *>) {
+                        s = o.toMapString()
+                    }
+                    if (eCode) {
+                        s = EncryptDES.eCode(s)
+                    }
+                    sb.append(s.replace("\n".toRegex(), "\n║"))
+                } else {
+                    sb.append("null")
+                }
+                sb.append("___")
+            }
+            sb.append("\n╚═════════════════════════════════")
+            logE(TAG, sb.toMyString())
+        }
+    }
+
+    private fun getString(eCode: Boolean, vararg objects: Any?): String {
+        val sb = StringBuilder()
         for (o in objects) {
             if (o != null) {
                 var s = o.toMyString()
@@ -98,39 +177,9 @@ object EchoLog {
             }
             sb.append("___")
         }
-        sb.append("\n╚═════════════════════════════════")
-        logE(TAG, sb.toMyString())
+        return sb.toString()
     }
 
-    @JvmStatic
-    fun logStackTrace(vararg objects: Any?) {
-        if (!enableLog) {
-            return
-        }
-        val sb = StringBuilder()
-        val a = Throwable()
-        sb.append(" \n╔═════════════════════════════════")
-        var jiantou = ""
-        for (traceElement1 in a.stackTrace) {
-            jiantou = "$jiantou➨"
-            sb.append("\n║")
-            sb.append(jiantou)
-            sb.append("at ")
-            sb.append(traceElement1)
-        }
-        sb.append("\n╟───────────────────────────────────\n")
-        sb.append("║")
-        for (o in objects) {
-            if (o != null) {
-                sb.append(o)
-            } else {
-                sb.append("null")
-            }
-            sb.append("___")
-        }
-        sb.append("\n╚═════════════════════════════════")
-        logE("wgsdk", sb.toMyString())
-    }
 
     fun logE(TAG: String, msg: String) {
         val strLength = msg.length
