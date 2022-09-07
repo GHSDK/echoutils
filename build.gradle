@@ -66,7 +66,7 @@ apply plugin: 'maven-publish'
 def GITHUB_REPO_PATH = "../maven/"
 ///说明文档
 def DESCRIPTION = '2022/8/30 第一版'
-def VERSION = theVersionNameCode + '-beta0.2'
+def VERSION = theVersionNameCode
 //Executing tasks: [publishMainPublicationToMavenRepository] in project E:\workdata\SDK\Gh_TW\twsdk
 afterEvaluate {
 
