@@ -8,6 +8,15 @@
             android:authorities="${applicationId}.UtilsProvider"
             android:exported="true" />
         <activity android:name=".EmptyFragmentActivity" />
+        <receiver
+            android:name=".ShareUtils$MyResultReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.twitter.sdk.android.tweetcomposer.UPLOAD_SUCCESS" />
+                <action android:name="com.twitter.sdk.android.tweetcomposer.UPLOAD_FAILURE" />
+                <action android:name="com.twitter.sdk.android.tweetcomposer.TWEET_COMPOSE_CANCEL" />
+            </intent-filter>
+        </receiver>
     </application>
     <queries>
         <package android:name="com.twitter.android" />

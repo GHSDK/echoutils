@@ -55,8 +55,10 @@ dependencies {
 
     implementation 'androidx.activity:activity-ktx:1.4.0'
 
+    //fb分享
     compileOnly 'com.facebook.android:facebook-share:13.0.0'
-
+    //tw分享
+    compileOnly 'com.twitter.sdk.android:twitter:3.3.0'
 }
 
 //***************************** 打包发布 *****************************************

@@ -218,6 +218,17 @@ object EchoUtils {
     fun isNullList(list: List<*>?): Boolean {
         return list?.isEmpty() ?: true
     }
+
+    fun printIntent(intent: Intent) {
+        // intent信息
+        var s = intent.toUri(0)
+        intent.extras?.apply {
+            for (key in keySet()) {
+                s += "\n Key=" + key + ", content=" + get(key)
+            }
+        }
+        EchoLog.log("intent:", s)
+    }
 }
 
 fun List<*>?.isNullList(): Boolean {
