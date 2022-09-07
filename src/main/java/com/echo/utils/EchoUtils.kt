@@ -305,6 +305,18 @@ fun Activity.launch(
     return this.getCoroutineScope().launch(context, start, block)
 }
 
+fun Activity.startActivityWithSafe(intent: Intent, log: Boolean = true) {
+    if (log) {
+        EchoLog.log("startActivity:" + intent.toUri(0))
+    }
+    try {
+        startActivity(intent)
+    } catch (e: Throwable) {
+        EchoLog.log(e.message)
+        e.printStackTrace()
+    }
+}
+
 /**
  * 如果是类型T 执行action，如果不是就执行no
  * */

@@ -45,3 +45,67 @@ eg：顶部标出打log的线程名称。内容部分默认打印2个调用栈(�
 ```kotlin
     EchoLog.addIgnore(CommonUtils.class. getName ());
 ```
+
+### 分享工具
+
+1. fb分享
+加入依赖
+```groovy
+    //fb分享
+    implementation 'com.facebook.android:facebook-share:13.0.0'
+```
+```kotlin
+    fun fbShareLink(
+       activity: Activity,
+       url: String?,
+       quote: String? = null,
+       callback: ShareCallBack?
+    )
+    fun fbShareMedia(
+       activity: Activity,
+       images: List<String?>?,
+       videos: List<String?>?,
+       bitmap: List<Bitmap?>?,
+       callback: ShareCallBack?
+    )
+    fun fbShare(activity: Activity, content: ShareContent<*, *>, callback: ShareCallBack?) 
+```
+2. twitter分享
+加入依赖
+```groovy
+    //tw分享
+    implementation 'com.twitter.sdk.android:twitter:3.3.0'
+```
+```kotlin
+    //https://github.com/twitter-archive/twitter-kit-android/wiki/Compose-Tweets#launching-twitter-composer
+    fun twShare(
+        activity: Activity,
+        content: String?,
+        imageUri: String?,
+        url: String?,
+        bitmap: Bitmap?,
+        callback: ShareCallBack?
+    )
+```
+3. line分享
+```kotlin
+    /**
+     * lin分享必须是file:/// 这种path路径，
+     * 不能是url，必须先下载到本地 getHttpImageToLocal
+     * 不能是content，必须找到原本的path  getRealFilePath
+     *
+     */
+    fun lineShareImage(activity: Activity, imageUri: String?)
+    fun lineShareImage(activity: Activity, bitmap: Bitmap?)
+    fun lineShareString(activity: Activity, content: String?) 
+```
+4. 封装了不具名分享
+```kotlin
+    fun justSendShare(
+        activity: Activity,
+        title: String?,
+        text: String?,
+        uris: List<String?>?,
+        bitmaps: List<Bitmap?>?
+    )
+```

@@ -32,7 +32,20 @@ import java.net.URL
  * describe :
  */
 object ShareUtils {
+    fun lineShareString(activity: Activity, content: String?) {
+        if (content == null) {
+            return
+        }
+        val scheme = "line://msg/text/$content"
+        val uri = Uri.parse(scheme)
+        try {
+            activity.startActivityWithSafe(Intent(Intent.ACTION_VIEW, uri))
+        } catch (e: Throwable) {
+            EchoLog.log(e.message)
+            e.printStackTrace()
+        }
 
+    }
 
     /**
      * lin分享必须是file:/// 这种path路径，
@@ -78,7 +91,7 @@ object ShareUtils {
             val scheme = "line://msg/image$it"
             EchoLog.log(scheme)
             val uri = Uri.parse(scheme)
-            EchoUtils.startActivity(activity, Intent(Intent.ACTION_VIEW, uri))
+            activity.startActivityWithSafe(Intent(Intent.ACTION_VIEW, uri))
         }
     }
 
@@ -349,8 +362,7 @@ object ShareUtils {
             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
         }
         EchoLog.log(uris)
-        val share = Intent.createChooser(intent, title)
-        EchoUtils.startActivity(activity, share)
+        activity.startActivityWithSafe(Intent.createChooser(intent, title))
     }
 
     @Keep
@@ -427,8 +439,7 @@ object ShareUtils {
                     return@forEach
                 }
             }
-            EchoUtils.printIntent(this)
-            EchoUtils.startActivity(activity, this)
+            activity.startActivityWithSafe(this)
         }
     }
 
