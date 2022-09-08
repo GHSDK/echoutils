@@ -181,14 +181,13 @@ object EchoUtils {
      * @param content
      */
     fun showToast(content: String?) {
-        val toast: Toast = toastWeakReference?.get() ?: Toast.makeText(
+        val toast = toastWeakReference?.get() ?: Toast.makeText(
             getApplicationContext(),
             content,
             Toast.LENGTH_SHORT
-        ).apply {
-            setText(content)
-            show()
-        }
+        )
+        toast.setText(content)
+        toast.show()
         if (toastWeakReference?.get() == null) {
             toastWeakReference = WeakReference(toast)
         }
@@ -281,6 +280,20 @@ fun String?.isNotEmptyAndDo(action: (String) -> Unit) {
         if (this.isNotEmpty()) {
             action.invoke(this)
         }
+    }
+}
+
+fun String?.isNotNullAndDo(action: (String) -> Unit) {
+    this?.apply {
+        if (this.isNotEmpty() && !"null".equals(this, true)) {
+            action.invoke(this)
+        }
+    }
+}
+
+fun String?.isNullAndDo(action: () -> Unit) {
+    if (this == null || this == "" || "null".equals(this, true)) {
+        action.invoke()
     }
 }
 

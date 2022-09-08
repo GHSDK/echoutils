@@ -58,17 +58,26 @@ object EchoLog {
     //规定每段显示的长度
     private const val LOG_MAX_LENGTH = 2 * 1024
 
-    @JvmStatic
+
     fun log(vararg objects: Any?) {
         logWitheECode(false, tag, *objects)
     }
 
-    @JvmStatic
+    fun logDiff(vararg objects: Any?) {
+        logWith(justShowDiffLog = true, objects = *objects)
+    }
+
+
+    fun cleanDiff() {
+        beforeLog.clear()
+    }
+
+
     fun logECode(eCode: Boolean, vararg objects: Any?) {
         logWitheECode(eCode, tag, *objects)
     }
 
-    @JvmStatic
+
     fun logIf(show: Boolean, vararg objects: Any?) {
         if (!show) {
             return
@@ -94,25 +103,31 @@ object EchoLog {
         if (!enableLog) {
             return
         }
-        myLog(eCode = eCode, TAG = TAG, objects = objects)
+        logWith(eCode = eCode, TAG = TAG, objects = objects)
     }
 
 
-    @JvmStatic
     fun logStackTrace(vararg objects: Any?) {
         if (!enableLog) {
             return
         }
-        myLog(all = true, objects = objects)
+        logWith(all = true, objects = objects)
     }
 
     private var traceCount = 2
+    val beforeLog: HashMap<String, String> = HashMap()
 
+    /**
+     * @param eCode 加密
+     * @param justShowDiffLog 在相同的调用地方，只有在log不同时才打印
+     * @param all 是否打印全部的stackTrace
+     * */
     @OptIn(DelicateCoroutinesApi::class)
-    private fun myLog(
+    fun logWith(
         eCode: Boolean = false,
         TAG: String = tag,
         all: Boolean = false,
+        justShowDiffLog: Boolean = false,
         vararg objects: Any?
     ) {
         val t = Throwable()
@@ -122,6 +137,7 @@ object EchoLog {
             sb.append(" \n╔═══${th.name}:${th.id}════════════════════════════")
             var jiantou = "➨"
             var count = if (all) 100 else traceCount
+            var callstackTrace = ""
             out@ for (traceElement1 in t.stackTrace) {
                 if (count <= 0) {
                     break
@@ -130,6 +146,9 @@ object EchoLog {
                     if (traceElement1.toString().contains(v)) {
                         continue@out
                     }
+                }
+                callstackTrace.isNullAndDo {
+                    callstackTrace = traceElement1.toString()
                 }
                 count--
                 jiantou = "$jiantou➨"
@@ -156,7 +175,14 @@ object EchoLog {
                 sb.append("___")
             }
             sb.append("\n╚═════════════════════════════════")
-            logE(TAG, sb.toMyString())
+            val now = sb.toMyString()
+            if (justShowDiffLog) {
+                if (beforeLog[callstackTrace] == now) {
+                    return@launch
+                }
+                beforeLog[callstackTrace] = now
+            }
+            logE(TAG, now)
         }
     }
 
