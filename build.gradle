@@ -6,7 +6,7 @@ def gitCommitHash = 'git log  -1 --pretty="%H"'.execute([], project.rootDir).tex
 def gitLog = new String('git log  -1 --pretty="%s"'.execute([], project.rootDir).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def branch = new String('git branch --show-current'.execute([], project.rootDir).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def time = new Date().format("yyyy-MM-dd HH:mm:ss").toString()
-def theVersionNameCode = '0.0.1'
+def theVersionNameCode = '1.0.0'
 def theVersionName = 'echo.utils.' + theVersionNameCode
 android {
     compileSdk 32
@@ -63,6 +63,7 @@ dependencies {
 
 //***************************** 打包发布 *****************************************
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
 def GITHUB_REPO_PATH = "../maven/"
 ///说明文档
 def DESCRIPTION = '2022/8/30 第一版'
@@ -72,8 +73,17 @@ afterEvaluate {
 
     publishing {
         repositories {
+            //本地
+//            maven {
+//                url = "file://${file(GITHUB_REPO_PATH).absolutePath}"
+//            }
+            //maven  https://issues.sonatype.org/browse/OSSRH-84327?filter=-4
             maven {
-                url = "file://${file(GITHUB_REPO_PATH).absolutePath}"
+                url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                credentials {
+                    username "361170803@qq.com" // ossrhUsername is your sonatype username
+                    password "87nbWq26r%P#!S6" // ossrhUsername is your sonatype password
+                }
             }
         }
         publications {
@@ -81,11 +91,33 @@ afterEvaluate {
                 // The following applies a component to this publication
                 // which results in publishing an app bundle.
                 from components.release
-                groupId = 'com.echo'
-                artifactId = 'utils'
+                groupId = 'io.github.ghsdk'
+                artifactId = 'echoutils'
                 version = VERSION
                 pom {
                     description = DESCRIPTION
+                    name = 'ECHO UTILS'
+                    description = '包含了log工具，分享工具等通用工具'
+                    url = 'https://github.com/GHSDK/echoutils'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'echo'
+                            name = 'dongjunjie'
+                            email = '361170803@qq.com'
+                        }
+                    }
+
+                    scm {
+                        connection = 'https://github.com/GHSDK/echoutils.git'
+                        developerConnection = 'https://github.com/GHSDK/echoutils.git'
+                        url = 'https://github.com/GHSDK/echoutils'
+                    }
                     properties = [
                             'git-Log'       : gitLog,
                             'git-branch'    : branch,
@@ -96,4 +128,12 @@ afterEvaluate {
             }
         }
     }
+
+    signing {
+        sign publishing.publications.Main
+    }
 }
+
+
+
+
