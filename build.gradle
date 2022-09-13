@@ -6,7 +6,7 @@ def gitCommitHash = 'git log  -1 --pretty="%H"'.execute([], project.rootDir).tex
 def gitLog = new String('git log  -1 --pretty="%s"'.execute([], project.rootDir).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def branch = new String('git branch --show-current'.execute([], project.rootDir).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def time = new Date().format("yyyy-MM-dd HH:mm:ss").toString()
-def theVersionNameCode = '1.0.0'
+def theVersionNameCode = '1.0.1'
 def theVersionName = 'echo.utils.' + theVersionNameCode
 android {
     compileSdk 32
@@ -36,6 +36,14 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    sourceSets {
+        main {
+            java {
+                include '**/*.java'
+                include '**/*.kt'
+            }
+        }
+    }
 }
 
 dependencies {
@@ -64,27 +72,28 @@ dependencies {
 //***************************** 打包发布 *****************************************
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
-def GITHUB_REPO_PATH = "../maven/"
 ///说明文档
-def DESCRIPTION = '2022/8/30 第一版'
+def DESCRIPTION = '2022/9/13 添加源码以及javac'
 def VERSION = theVersionNameCode
+
 //Executing tasks: [publishMainPublicationToMavenRepository] in project E:\workdata\SDK\Gh_TW\twsdk
+//在javadoc 的时候可能会有中文乱码以及说GBK无法转化  需要在环境变量中年添加 变量:JAVA_TOOL_OPTIONS     值：-Dfile.encoding=UTF-8
 afterEvaluate {
 
     publishing {
         repositories {
             //本地
-//            maven {
-//                url = "file://${file(GITHUB_REPO_PATH).absolutePath}"
-//            }
-            //maven  https://issues.sonatype.org/browse/OSSRH-84327?filter=-4
             maven {
-                url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-                credentials {
-                    username "361170803@qq.com" // ossrhUsername is your sonatype username
-                    password "87nbWq26r%P#!S6" // ossrhUsername is your sonatype password
-                }
+                url = "file://${file("../maven/").absolutePath}"
             }
+            //maven  https://issues.sonatype.org/browse/OSSRH-84327?filter=-4
+//            maven {
+//                url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+//                credentials {
+//                    username "361170803@qq.com" // ossrhUsername is your sonatype username
+//                    password "87nbWq26r%P#!S6" // ossrhUsername is your sonatype password
+//                }
+//            }
         }
         publications {
             Main(MavenPublication) {
@@ -94,6 +103,23 @@ afterEvaluate {
                 groupId = 'io.github.ghsdk'
                 artifactId = 'echoutils'
                 version = VERSION
+
+                task androidJavadocs(type: Javadoc) {
+                    source = android.sourceSets.main.java.source
+                    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+                    excludes = ['**/*.kt']
+                }
+                task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+                    classifier = 'javadoc'
+                    from androidJavadocs.destinationDir
+                }
+
+                task androidSourcesJar(type: Jar) {
+                    classifier = 'sources'
+                    from android.sourceSets.main.java.source
+                }
+                artifact(androidSourcesJar)
+                artifact(androidJavadocsJar)
                 pom {
                     description = DESCRIPTION
                     name = 'ECHO UTILS'
@@ -133,7 +159,4 @@ afterEvaluate {
         sign publishing.publications.Main
     }
 }
-
-
-
 

@@ -12,12 +12,18 @@ import javax.crypto.Cipher;
  * describe :
  */
 public class EncryptDES {
-    // 字符串默认键值
+    /**
+     * 字符串默认键值
+     */
     private static final String strDefaultKey = "game hours";
     static EncryptDES defaultEncryptDES = new EncryptDES();
-    //加密工具
+    /**
+     * 加密工具
+     */
     private Cipher encryptCipher = null;
-    // 解密工具
+    /**
+     * 解密工具
+     */
     private Cipher decryptCipher = null;
 
     /**
@@ -31,7 +37,6 @@ public class EncryptDES {
      * 指定密钥构造方法
      *
      * @param strKey 指定的密钥
-     * @throws Exception
      */
     public EncryptDES(String strKey) {
         try {
@@ -88,7 +93,7 @@ public class EncryptDES {
      * @param strIn 需要转换的字符串
      * @return 转换后的byte数组
      */
-    public static byte[] hexStr2ByteArr(String strIn) throws Exception {
+    public static byte[] hexStr2ByteArr(String strIn) {
         byte[] arrB = strIn.getBytes();
         int iLen = arrB.length;
         // 两个字符表示一个字节，所以字节数组长度是字符串长度除以2
@@ -105,6 +110,7 @@ public class EncryptDES {
      *
      * @param arrB 需加密的字节数组
      * @return 加密后的字节数组
+     * @throws Exception  BadPaddingException, IllegalBlockSizeException
      */
     public byte[] encrypt(byte[] arrB) throws Exception {
         return encryptCipher.doFinal(arrB);
@@ -133,6 +139,7 @@ public class EncryptDES {
      *
      * @param arrB 需解密的字节数组
      * @return 解密后的字节数组
+     *  @throws Exception  BadPaddingException, IllegalBlockSizeException
      */
     public byte[] decrypt(byte[] arrB) throws Exception {
         return decryptCipher.doFinal(arrB);
