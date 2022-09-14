@@ -315,7 +315,7 @@ fun Activity.getCoroutineScope(): CoroutineScope {
 }
 
 fun Activity.launch(
-    context: CoroutineContext = EmptyCoroutineContext,
+    context: CoroutineContext = Dispatchers.IO,
     start: CoroutineStart = CoroutineStart.DEFAULT,
     block: suspend CoroutineScope.() -> Unit
 ): Job {
