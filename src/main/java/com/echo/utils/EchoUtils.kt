@@ -58,10 +58,11 @@ object EchoUtils {
      * 网络图片不处理
      *
      * */
-    fun getContentFilePath(path: String): Uri? {
-        if (TextUtils.isEmpty(path)) {
+    fun getContentFilePath(thePath: String?): Uri? {
+        if (TextUtils.isEmpty(thePath)) {
             return null
         }
+        val path = thePath ?: ""
         if (path.startsWith("content") || path.startsWith("http")) {
             return Uri.parse(path)
         }
@@ -198,8 +199,11 @@ object EchoUtils {
      * 如果是网络图片，就下载到本地，返回"content://"
      * 如果不是网络图片，直接返回，不处理
      * */
-    suspend fun getHttpImageToLocal(image: String, activity: Activity): String {
-        if (!image.startsWith("http")) {
+    suspend fun getHttpImageToLocal(image: String?, activity: Activity): String {
+        if (TextUtils.isEmpty(image)) {
+            return ""
+        }
+        if (image?.startsWith("http") == true) {
             return image
         }
         var ans = ""
@@ -362,6 +366,20 @@ inline fun <reified T> Any?.isAndPerform(
         yes.invoke(this as T)
     } else {
         no.invoke(this)
+    }
+}
+
+
+inline fun <T : Any> Iterable<T?>?.forEachNotNull(action: (T) -> Unit): Unit {
+    this?.apply {
+        for (element in this) {
+            if (element is String) {
+                if (element.isNullOrEmpty()) {
+                    return
+                }
+            }
+            element?.apply { action(element) }
+        }
     }
 }
 

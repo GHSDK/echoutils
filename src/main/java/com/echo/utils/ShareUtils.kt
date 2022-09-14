@@ -211,26 +211,16 @@ object ShareUtils {
             return
         }
         val content = ShareMediaContent.Builder()
-        images?.forEach {
-            it?.apply {
-                if (TextUtils.isEmpty(it)) {
-                    return@apply
-                }
-                content.addMedium(SharePhoto.Builder().setImageUrl(Uri.parse(it)).build())
+        images.forEachNotNull {
+            EchoUtils.getContentFilePath(it)?.apply {
+                content.addMedium(SharePhoto.Builder().setImageUrl(this).build())
             }
         }
-        bitmap?.forEach {
-            it?.apply {
-                content.addMedium(SharePhoto.Builder().setBitmap(it).build())
-            }
+        bitmap.forEachNotNull {
+            content.addMedium(SharePhoto.Builder().setBitmap(it).build())
         }
-        videos?.forEach {
-            it?.apply {
-                if (TextUtils.isEmpty(it)) {
-                    return@apply
-                }
-                content.addMedium(ShareVideo.Builder().setLocalUrl(Uri.parse(it)).build())
-            }
+        videos.forEachNotNull {
+            content.addMedium(ShareVideo.Builder().setLocalUrl(Uri.parse(it)).build())
         }
         fbShare(activity, content.build(), callback)
     }
