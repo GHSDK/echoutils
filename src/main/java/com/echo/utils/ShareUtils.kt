@@ -366,6 +366,18 @@ object ShareUtils {
     const val TWITTER = "com.twitter.android"
     const val TWITTER_POS = "com.twitter.composer.ComposerActivity"
 
+    fun twShareAlbumImage(
+        activity: Activity,
+        content: String?,
+        url: String?,
+        callback: ShareCallBack?
+    ) {
+        activity.launch {
+            val image = pickerImage(activity).getSafeItem(0).toMyString()
+            twShare(activity, content, image, url, null, callback)
+        }
+    }
+
     //https://github.com/twitter-archive/twitter-kit-android/wiki/Compose-Tweets#launching-twitter-composer
     fun twShare(
         activity: Activity,
