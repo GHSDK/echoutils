@@ -83,7 +83,7 @@ afterEvaluate {
         repositories {
             //本地
 //            maven {
-//                url = "file://${file("../maven/").absolutePath}"
+//                url = "file://${file("../GHSDKJP_Android/").absolutePath}"
 //            }
 
             //tw也得用

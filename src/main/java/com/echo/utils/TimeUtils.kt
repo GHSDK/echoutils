@@ -45,6 +45,21 @@ object TimeUtils {
         return sdf.format(Date(java.lang.Long.valueOf(seconds + "000")))
     }
 
+    fun String?.olderThan(t2: String?): Boolean {
+        return compareTimeT1BiggerThanT2(this.toMyLong(), t2.toMyLong())
+    }
+
+    fun String?.timeIn(start: String?, end: String?): Boolean {
+        return this.olderThan(start) && end.olderThan(this)
+    }
+
+    fun String?.toMyLong(df: Long = 0): Long {
+        return try {
+            this?.toLong() ?: df
+        } catch (e: Throwable) {
+            df
+        }
+    }
 
 
 }
