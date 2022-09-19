@@ -239,7 +239,7 @@ object SystemUtils {
             resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
         } catch (e: Throwable) {
             e.printStackTrace()
-            EchoLog.log(e.message)
+            log(e.message)
             return null
         }
         uri?.apply {
@@ -261,12 +261,29 @@ object SystemUtils {
 
             } catch (e: IOException) {
                 resolver.delete(uri, null, null)
-                EchoLog.log(e.message)
+                log(e.message)
                 e.printStackTrace()
                 return null
             }
         }
         return null
+    }
 
+    /**
+     * 检查app是否存在
+     * @param pkgName 包名
+     * */
+    fun checkPackageInstalled(pkgName: String?): Boolean {
+        val name = pkgName ?: ""
+        if (TextUtils.isEmpty(pkgName)) {
+            return false
+        }
+        return try {
+            EchoUtils.getApplicationContext().packageManager.getPackageInfo(name, 0) != null
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            log(e.message)
+            false
+        }
     }
 }
