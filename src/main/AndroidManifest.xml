@@ -7,7 +7,9 @@
             android:name="com.echo.utils.UtilsProvider"
             android:authorities="${applicationId}.UtilsProvider"
             android:exported="true" />
-        <activity android:name=".EmptyFragmentActivity" />
+        <activity
+            android:name=".EmptyFragmentActivity"
+            android:theme="@style/TransparentTheme" />
         <receiver
             android:name=".ShareUtils$MyResultReceiver"
             android:exported="false">
@@ -21,6 +23,7 @@
     <queries>
         <package android:name="com.twitter.android" />
         <package android:name="com.facebook.katana" />
+
         <provider android:authorities="com.facebook.katana.provider.PlatformProvider" />
     </queries>
 
