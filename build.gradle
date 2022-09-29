@@ -6,7 +6,7 @@ def gitCommitHash = 'git log  -1 --pretty="%H"'.execute([], project.rootDir).tex
 def gitLog = new String('git log  -1 --pretty="%s"'.execute([], project.rootDir).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def branch = new String('git branch --show-current'.execute([], project.rootDir).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def time = new Date().format("yyyy-MM-dd HH:mm:ss").toString()
-def theVersionNameCode = '1.0.3'
+def theVersionNameCode = '1.0.4'
 def theVersionName = 'echo.utils.' + theVersionNameCode
 android {
     compileSdk 32
@@ -73,7 +73,7 @@ dependencies {
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 ///说明文档
-def DESCRIPTION = '2022/9/14 fb分享添加类型转化'
+def DESCRIPTION = '2022/9/29 修复主题问题'
 def VERSION = theVersionNameCode
 
 //Executing tasks: [publishMainPublicationToMavenRepository] in project E:\workdata\SDK\Gh_TW\twsdk
@@ -87,18 +87,18 @@ afterEvaluate {
 //            }
 
             //tw也得用
-//            maven {
-//                url = "file://${file("E:/workdata/SDK/Gh_TW/GHSDK_TW_Android").absolutePath}"
-//            }
+            maven {
+                url = "file://${file("E:/workdata/SDK/Gh_TW/GHSDK_TW_Android").absolutePath}"
+            }
 
             //maven  https://issues.sonatype.org/browse/OSSRH-84327?filter=-4
-            maven {
-                url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-                credentials {
-                    username "361170803@qq.com" // ossrhUsername is your sonatype username
-                    password "87nbWq26r%P#!S6" // ossrhUsername is your sonatype password
-                }
-            }
+//            maven {
+//                url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+//                credentials {
+//                    username "361170803@qq.com" // ossrhUsername is your sonatype username
+//                    password "87nbWq26r%P#!S6" // ossrhUsername is your sonatype password
+//                }
+//            }
         }
         publications {
             Main(MavenPublication) {
