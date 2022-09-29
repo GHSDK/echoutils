@@ -87,18 +87,18 @@ afterEvaluate {
 //            }
 
             //tw也得用
-            maven {
-                url = "file://${file("E:/workdata/SDK/Gh_TW/GHSDK_TW_Android").absolutePath}"
-            }
+//            maven {
+//                url = "file://${file("E:/workdata/SDK/Gh_TW/GHSDK_TW_Android").absolutePath}"
+//            }
 
             //maven  https://issues.sonatype.org/browse/OSSRH-84327?filter=-4
-//            maven {
-//                url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-//                credentials {
-//                    username "361170803@qq.com" // ossrhUsername is your sonatype username
-//                    password "87nbWq26r%P#!S6" // ossrhUsername is your sonatype password
-//                }
-//            }
+            maven {
+                url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                credentials {
+                    username "361170803@qq.com" // ossrhUsername is your sonatype username
+                    password "87nbWq26r%P#!S6" // ossrhUsername is your sonatype password
+                }
+            }
         }
         publications {
             Main(MavenPublication) {
