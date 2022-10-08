@@ -242,7 +242,12 @@ fun Any?.toMyString(nullValue: String = ""): String {
     if (this == null) {
         return nullValue
     }
-    return this.toString()
+    return try {
+        this.toString()
+    }catch (e :Throwable){
+        e.printStackTrace()
+        "error:${e.message}"
+    }
 }
 
 fun CharSequence?.isNullOrEmpty(): Boolean {
