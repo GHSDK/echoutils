@@ -7,6 +7,9 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.provider.MediaStore
 import android.text.TextUtils
@@ -23,7 +26,6 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.lang.ref.WeakReference
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -232,6 +234,45 @@ object EchoUtils {
         }
         EchoLog.log("intent:", s)
     }
+
+    fun getAppName(pkgName: String = ""): String {
+        var name: String = ""
+        try {
+            getApplicationContext().apply {
+                var info = applicationInfo
+                pkgName.isNotEmptyAndDo {
+                    info = packageManager.getApplicationInfo(
+                        pkgName,
+                        0
+                    )
+                }
+                name = packageManager.getApplicationLabel(info).toString()
+            }
+
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+        return name
+    }
+
+    fun getAppIcon(pkgName: String = ""): Drawable {
+        var drawable: Drawable = ColorDrawable(Color.BLACK)
+        try {
+            getApplicationContext().apply {
+                var info = applicationInfo
+                pkgName.isNotEmptyAndDo {
+                    info = packageManager.getApplicationInfo(
+                        pkgName,
+                        0
+                    )
+                }
+                drawable = packageManager.getApplicationIcon(info)
+            }
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+        return drawable
+    }
 }
 
 fun List<*>?.isNullList(): Boolean {
@@ -244,7 +285,7 @@ fun Any?.toMyString(nullValue: String = ""): String {
     }
     return try {
         this.toString()
-    }catch (e :Throwable){
+    } catch (e: Throwable) {
         e.printStackTrace()
         "error:${e.message}"
     }

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.*
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -142,7 +143,7 @@ object EchoLog {
                 if (count <= 0) {
                     break
                 }
-                for (v in ignore) {
+                for (v in Collections.synchronizedList(ignore)) {
                     if (traceElement1.toString().contains(v)) {
                         continue@out
                     }
