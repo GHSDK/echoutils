@@ -6,7 +6,7 @@ def gitCommitHash = 'git log  -1 --pretty="%H"'.execute([], project.rootDir).tex
 def gitLog = new String('git log  -1 --pretty="%s"'.execute([], project.rootDir).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def branch = new String('git branch --show-current'.execute([], project.rootDir).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def time = new Date().format("yyyy-MM-dd HH:mm:ss").toString()
-def theVersionNameCode = '1.0.5'
+def theVersionNameCode = '1.0.6'
 def theVersionName = 'echo.utils.' + theVersionNameCode
 android {
     compileSdk 32
@@ -73,7 +73,7 @@ dependencies {
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 ///说明文档
-def DESCRIPTION = '2022/9/29 修复主题问题'
+def DESCRIPTION = '2022/10/31 log线程问题'
 def VERSION = theVersionNameCode
 
 //Executing tasks: [publishMainPublicationToMavenRepository] in project E:\workdata\SDK\Gh_TW\twsdk
