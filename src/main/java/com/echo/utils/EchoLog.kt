@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -135,55 +134,60 @@ object EchoLog {
         val th = Thread.currentThread()
         val sb = StringBuilder()
         GlobalScope.launch {
-            sb.append(" \n╔═══${th.name}:${th.id}════════════════════════════")
-            var jiantou = "➨"
-            var count = if (all) 100 else traceCount
-            var callstackTrace = ""
-            out@ for (traceElement1 in t.stackTrace) {
-                if (count <= 0) {
-                    break
-                }
-                for (v in Collections.synchronizedList(ignore)) {
-                    if (traceElement1.toString().contains(v)) {
-                        continue@out
+            try {
+                sb.append(" \n╔═══${th.name}:${th.id}════════════════════════════")
+                var jiantou = "➨"
+                var count = if (all) 100 else traceCount
+                var callstackTrace = ""
+                out@ for (traceElement1 in t.stackTrace) {
+                    if (count <= 0) {
+                        break
                     }
-                }
-                callstackTrace.isNullAndDo {
-                    callstackTrace = traceElement1.toString()
-                }
-                count--
-                jiantou = "$jiantou➨"
-                sb.append("\n║")
-                sb.append(jiantou)
-                sb.append("at ")
-                sb.append(traceElement1)
-            }
-            sb.append("\n╟───────────────────────────────────\n")
-            sb.append("║")
-            for (o in objects) {
-                if (o != null) {
-                    var s = o.toMyString()
-                    if (o is Map<*, *>) {
-                        s = o.toMapString()
+                    for (a in 0 until ignore.size) {
+                        if (traceElement1.toString().contains(ignore[a])) {
+                            continue@out
+                        }
                     }
-                    if (eCode) {
-                        s = EncryptDES.eCode(s)
+                    callstackTrace.isNullAndDo {
+                        callstackTrace = traceElement1.toString()
                     }
-                    sb.append(s.replace("\n".toRegex(), "\n║"))
-                } else {
-                    sb.append("null")
+                    count--
+                    jiantou = "$jiantou➨"
+                    sb.append("\n║")
+                    sb.append(jiantou)
+                    sb.append("at ")
+                    sb.append(traceElement1)
                 }
-                sb.append("___")
-            }
-            sb.append("\n╚═════════════════════════════════")
-            val now = sb.toMyString()
-            if (justShowDiffLog) {
-                if (beforeLog[callstackTrace] == now) {
-                    return@launch
+                sb.append("\n╟───────────────────────────────────\n")
+                sb.append("║")
+                for (o in objects) {
+                    if (o != null) {
+                        var s = o.toMyString()
+                        if (o is Map<*, *>) {
+                            s = o.toMapString()
+                        }
+                        if (eCode) {
+                            s = EncryptDES.eCode(s)
+                        }
+                        sb.append(s.replace("\n".toRegex(), "\n║"))
+                    } else {
+                        sb.append("null")
+                    }
+                    sb.append("___")
                 }
-                beforeLog[callstackTrace] = now
+                sb.append("\n╚═════════════════════════════════")
+                val now = sb.toMyString()
+                if (justShowDiffLog) {
+                    if (beforeLog[callstackTrace] == now) {
+                        return@launch
+                    }
+                    beforeLog[callstackTrace] = now
+                }
+                logE(TAG, now)
+            } catch (e: Throwable) {
+                e.printStackTrace()
+                logE(TAG, e.message.toString())
             }
-            logE(TAG, now)
         }
     }
 
