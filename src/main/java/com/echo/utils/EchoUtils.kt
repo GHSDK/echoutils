@@ -11,6 +11,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Bundle
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.widget.Toast
@@ -18,9 +19,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import com.echo.utils.coverx.ActivityLifeCycleOwner
+import com.echo.utils.data.JsonData
+import com.google.gson.Gson
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.*
 import java.io.File
@@ -428,6 +434,101 @@ inline fun <T : Any> Iterable<T?>?.forEachNotNull(action: (T) -> Unit): Unit {
         }
     }
 }
+
+
+fun DialogFragment.tryShow(manager: FragmentManager?) {
+    if (manager == null) {
+        return
+    }
+    try {
+        show(manager, javaClass.name.toString())
+    } catch (e: Throwable) {
+        EchoLog.log(e.message)
+        e.printStackTrace()
+    }
+}
+
+fun Fragment.doSetData(any: Any?): Fragment {
+    if (any == null) {
+        return this
+    }
+    val DATA_FLAG = "DATA_FLAG" + this.javaClass.name
+    val bundle = arguments ?: Bundle()
+    when (any) {
+        is String -> {
+            bundle.putString(DATA_FLAG, any)
+        }
+        is Int -> {
+            bundle.putInt(DATA_FLAG, any)
+        }
+        is Boolean -> {
+            bundle.putBoolean(DATA_FLAG, any)
+        }
+        else -> {
+            bundle.putString(DATA_FLAG, Gson().toJson(any))
+        }
+    }
+    arguments = bundle
+    return this
+}
+
+fun Fragment.doSetList(data: List<String>?): Fragment {
+    if (data == null) {
+        return this
+    }
+    doSetData(JsonData().apply { items = data })
+    return this
+}
+
+fun Fragment.doGetList(): List<String>? {
+    return doGetData(JsonData::class.java)?.items
+}
+
+fun Fragment.doGetDataBoolean(defV: Boolean = false): Boolean {
+    return doGetData(Boolean::class.java) ?: defV
+}
+
+fun Fragment.doGetDataInt(defV: Int = 0): Int {
+    return doGetData(Int::class.java) ?: defV
+}
+
+fun Fragment.doGetDataString(defV: String = ""): String {
+    return doGetData(String::class.java) ?: defV
+}
+
+fun <T> Fragment.doGetData(classOfT: Class<T>): T? {
+    val DATA_FLAG = "DATA_FLAG" + this.javaClass.name
+    when (classOfT) {
+        String::class.java,
+        String::class.javaObjectType -> {
+            return arguments?.getString(DATA_FLAG) as T
+        }
+        Int::class.java,
+        Int::class.javaObjectType -> {
+            return arguments?.getInt(DATA_FLAG) as T
+        }
+        Boolean::class.java,
+        Boolean::class.javaObjectType -> {
+            return arguments?.getBoolean(DATA_FLAG) as T
+        }
+        else -> {
+            return try {
+                val s = arguments?.getString(DATA_FLAG)
+                EchoLog.log(s)
+                if (TextUtils.isEmpty(s)) {
+                    null
+                } else {
+                    Gson().fromJson(s, classOfT)
+                }
+            } catch (e: Throwable) {
+                EchoLog.log(e.message)
+                e.printStackTrace()
+                null
+            }
+        }
+    }
+}
+
 
 
 
