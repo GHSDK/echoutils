@@ -22,8 +22,8 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.lifecycleScope
 import com.echo.utils.coverx.ActivityLifeCycleOwner
 import com.echo.utils.data.JsonData
 import com.google.gson.Gson
@@ -360,10 +360,11 @@ fun Boolean?.isTrueAndRun(action: () -> Unit) {
 }
 
 fun Activity.getCoroutineScope(): CoroutineScope {
-    if (this is ComponentActivity) {
-        return this.lifecycleScope
-    }
-    return ActivityLifeCycleOwner(this).lifecycle.coroutineScope
+    return getLifecycle().coroutineScope
+}
+
+fun Activity.getLifecycle(): Lifecycle {
+    return ActivityLifeCycleOwner.getActivityLifeCycle(this)
 }
 
 fun Activity.launch(
