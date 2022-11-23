@@ -211,7 +211,7 @@ object EchoUtils {
         if (TextUtils.isEmpty(image)) {
             return ""
         }
-        if (image?.startsWith("http") == true) {
+        if (image?.startsWith("http") == false) {
             return image
         }
         var ans = ""
