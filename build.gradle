@@ -7,7 +7,7 @@ def gitCommitHash = 'git log  -1 --pretty="%H"'.execute([], pathFile).text.trim(
 def gitLog = new String('git log  -1 --pretty="%s"'.execute([],pathFile).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def branch = new String('git branch --show-current'.execute([], pathFile).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def time = new Date().format("yyyy-MM-dd HH:mm:ss").toString()
-def theVersionNameCode = '1.0.9'
+def theVersionNameCode = '1.0.10'
 def theVersionName = 'echo.utils.' + theVersionNameCode
 android {
     compileSdk 32
@@ -74,7 +74,7 @@ dependencies {
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 ///说明文档
-def DESCRIPTION = '2022/11/23 分享以及协程问题修复'
+def DESCRIPTION = '2022/11/29 tw分享调整'
 def VERSION = theVersionNameCode
 
 //Executing tasks: [publishMainPublicationToMavenRepository] in project E:\workdata\SDK\Gh_TW\twsdk
@@ -91,9 +91,13 @@ afterEvaluate {
 //            maven {
 //                url = "file://${file("E:/workdata/SDK/Gh_TW/GHSDK_TW_Android").absolutePath}"
 //            }
-            //home
+            //home TW
+//            maven {
+//                url = "file://${file("J:/workdata/GAME_HOURS_TW_Android/GHSDK_TW_Android").absolutePath}"
+//            }
+            //home JP
             maven {
-                url = "file://${file("J:/workdata/GAME_HOURS_TW_Android/GHSDK_TW_Android").absolutePath}"
+                url = "file://${file("J:/workdata/GHSDK_JP_Android_Source/GHSDKJP_Android").absolutePath}"
             }
 
             //maven  https://issues.sonatype.org/browse/OSSRH-84327?filter=-4

@@ -431,16 +431,21 @@ object ShareUtils {
         }
         builder.createIntent().apply {
             EchoUtils.printIntent(this)
-            //默认分享发推
-            activity.packageManager.getPackageInfo(
-                TWITTER,
-                PackageManager.GET_ACTIVITIES
-            ).activities?.forEach {
-                if (it.name == TWITTER_POS) {
-                    setClassName(TWITTER, TWITTER_POS)
-                    return@forEach
+            try {
+                activity.packageManager.getPackageInfo(
+                    TWITTER,
+                    PackageManager.GET_ACTIVITIES
+                )?.activities?.forEach {
+                    if (it.name == TWITTER_POS) {
+                        setClassName(TWITTER, TWITTER_POS)
+                        return@forEach
+                    }
                 }
+            } catch (e: Throwable) {
+                e.printStackTrace()
+                EchoLog.log(e.message)
             }
+            //默认分享发推
             activity.startActivityWithSafe(this)
         }
     }

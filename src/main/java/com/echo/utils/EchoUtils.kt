@@ -7,6 +7,8 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
@@ -272,7 +274,7 @@ object EchoUtils {
                         0
                     )
                 }
-                drawable = packageManager.getApplicationIcon(info)
+                 drawable = packageManager.getApplicationIcon(info)
             }
         } catch (e: Throwable) {
             e.printStackTrace()
@@ -528,6 +530,20 @@ fun <T> Fragment.doGetData(classOfT: Class<T>): T? {
             }
         }
     }
+}
+
+fun getBitmap(img: ByteArray?): Bitmap? {
+    var rt: Bitmap? = null
+    if (img == null) {
+        return rt
+    }
+    try {
+        rt = BitmapFactory.decodeByteArray(img, 0, img.size)
+    } catch (e: Throwable) {
+        e.printStackTrace()
+        EchoLog.log(e.message)
+    }
+    return rt
 }
 
 
