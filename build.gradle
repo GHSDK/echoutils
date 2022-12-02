@@ -7,7 +7,7 @@ def gitCommitHash = 'git log  -1 --pretty="%H"'.execute([], pathFile).text.trim(
 def gitLog = new String('git log  -1 --pretty="%s"'.execute([],pathFile).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def branch = new String('git branch --show-current'.execute([], pathFile).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def time = new Date().format("yyyy-MM-dd HH:mm:ss").toString()
-def theVersionNameCode = '1.0.10'
+def theVersionNameCode = '1.0.12'
 def theVersionName = 'echo.utils.' + theVersionNameCode
 android {
     compileSdk 32
@@ -92,13 +92,13 @@ afterEvaluate {
 //                url = "file://${file("E:/workdata/SDK/Gh_TW/GHSDK_TW_Android").absolutePath}"
 //            }
             //home TW
-//            maven {
-//                url = "file://${file("J:/workdata/GAME_HOURS_TW_Android/GHSDK_TW_Android").absolutePath}"
-//            }
-            //home JP
             maven {
-                url = "file://${file("J:/workdata/GHSDK_JP_Android_Source/GHSDKJP_Android").absolutePath}"
+                url = "file://${file("J:/workdata/GAME_HOURS_TW_Android/GHSDK_TW_Android").absolutePath}"
             }
+            //home JP
+//            maven {
+//                url = "file://${file("J:/workdata/GHSDK_JP_Android_Source/GHSDKJP_Android").absolutePath}"
+//            }
 
             //maven  https://issues.sonatype.org/browse/OSSRH-84327?filter=-4
 //            maven {

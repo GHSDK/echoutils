@@ -14,6 +14,8 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.widget.Toast
@@ -43,6 +45,7 @@ import kotlin.coroutines.CoroutineContext
  */
 @SuppressLint("StaticFieldLeak")
 object EchoUtils {
+    var mainHandle = Handler(Looper.getMainLooper())
 
     internal var context: Context? = null
 
@@ -55,11 +58,18 @@ object EchoUtils {
         if (show) {
             EchoLog.log("startActivity:" + intent.toUri(0))
         }
-        try {
+        tryRun {
             activity.startActivity(intent)
+        }
+
+    }
+
+    fun tryRun(runnable: Runnable?) {
+        try {
+            runnable?.run()
         } catch (e: Throwable) {
-            EchoLog.log(e.message)
             e.printStackTrace()
+            EchoLog.log(e.message)
         }
     }
 
@@ -192,16 +202,25 @@ object EchoUtils {
      * @param content
      */
     fun showToast(content: String?) {
-        val toast = toastWeakReference?.get() ?: Toast.makeText(
-            getApplicationContext(),
-            content,
-            Toast.LENGTH_SHORT
-        )
-        toast.setText(content)
-        toast.show()
-        if (toastWeakReference?.get() == null) {
-            toastWeakReference = WeakReference(toast)
+        if (TextUtils.isEmpty(content)) {
+            return
         }
+        mainHandle.post {
+            val toast = toastWeakReference?.get() ?: Toast.makeText(
+                getApplicationContext(),
+                content,
+                Toast.LENGTH_SHORT
+            )
+            toast.setText(content)
+            toast.show()
+            if (toastWeakReference?.get() == null) {
+                toastWeakReference = WeakReference(toast)
+            }
+        }
+    }
+
+    fun runMainThread(runnable: Runnable) {
+        mainHandle.post(runnable)
     }
 
 
@@ -274,7 +293,7 @@ object EchoUtils {
                         0
                     )
                 }
-                 drawable = packageManager.getApplicationIcon(info)
+                drawable = packageManager.getApplicationIcon(info)
             }
         } catch (e: Throwable) {
             e.printStackTrace()
@@ -545,6 +564,8 @@ fun getBitmap(img: ByteArray?): Bitmap? {
     }
     return rt
 }
+
+
 
 
 
