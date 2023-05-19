@@ -169,7 +169,7 @@ object EchoLog {
         val t = Throwable()
         val th = Thread.currentThread()
         val sb = StringBuilder()
-        val time = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(Date())
+        val time = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(Date())
         GlobalScope.launch(Dispatchers.IO) {
             try {
                 sb.append(" \n╔═══${th.name}:${th.id}:$time════════════════════════════")
