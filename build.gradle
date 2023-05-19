@@ -79,6 +79,11 @@ def VERSION = theVersionCode
 
 //Executing tasks: [publishMainPublicationToMavenRepository] in project E:\workdata\SDK\Gh_TW\twsdk
 //在javadoc 的时候可能会有中文乱码以及说GBK无法转化  需要在环境变量中年添加 变量:JAVA_TOOL_OPTIONS     值：-Dfile.encoding=UTF-8
+task publishingTWSDK(dependsOn: ['publishMainPublicationToMavenRepository']) {
+    doLast {
+        println("+++++++++publishing echoutils+++++++++" + file('./').absolutePath)
+    }
+}
 afterEvaluate {
     publishing {
         repositories {
