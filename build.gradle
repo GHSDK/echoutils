@@ -92,22 +92,22 @@ afterEvaluate {
 //                url = "file://${file("E:/workdata/SDK/Gh_TW/GHSDK_TW_Android").absolutePath}"
 //            }
             //home TW
-            maven {
-                url = "file://${file("J:/workdata/GAME_HOURS_TW_Android/GHSDK_TW_Android").absolutePath}"
-            }
+//            maven {
+//                url = "file://${file("J:/workdata/GAME_HOURS_TW_Android/GHSDK_TW_Android").absolutePath}"
+//            }
             //home JP
 //            maven {
 //                url = "file://${file("J:/workdata/GHSDK_JP_Android_Source/GHSDKJP_Android").absolutePath}"
 //            }
 
             //maven  https://issues.sonatype.org/browse/OSSRH-84327?filter=-4
-//            maven {
-//                url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-//                credentials {
-//                    username "361170803@qq.com" // ossrhUsername is your sonatype username
-//                    password "87nbWq26r%P#!S6" // ossrhUsername is your sonatype password
-//                }
-//            }
+            maven {
+                url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                credentials {
+                    username "361170803@qq.com" // ossrhUsername is your sonatype username
+                    password "87nbWq26r%P#!S6" // ossrhUsername is your sonatype password
+                }
+            }
         }
         publications {
             Main(MavenPublication) {

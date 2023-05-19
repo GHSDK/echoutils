@@ -464,8 +464,30 @@ fun DialogFragment.tryShow(manager: FragmentManager?) {
     }
     try {
         show(manager, javaClass.name.toString())
+        return
     } catch (e: Throwable) {
         EchoLog.log(e.message)
+        e.printStackTrace()
+    }
+    try {
+        val dismissed = DialogFragment::class.java.getDeclaredField("mDismissed")
+        dismissed.isAccessible = true
+        dismissed.set(this, false)
+    } catch (e: Throwable) {
+        e.printStackTrace()
+    }
+    try {
+        val showByMe = DialogFragment::class.java.getDeclaredField("mShownByMe")
+        showByMe.isAccessible = true
+        showByMe.set(this, true)
+    } catch (e: Throwable) {
+        e.printStackTrace()
+    }
+    try {
+        val ft = manager.beginTransaction()
+        ft.add(this, tag)
+        ft.commitAllowingStateLoss()
+    } catch (e: Throwable) {
         e.printStackTrace()
     }
 }

@@ -6,8 +6,12 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -16,6 +20,15 @@ import kotlinx.coroutines.launch
  * describe :
  */
 object EchoLog {
+
+
+    private var logLevel = Log.VERBOSE
+
+    fun setLogLevel(int: Int) {
+        log("LevelBefore:", logLevel, "LevelNow:", int)
+        logLevel = int
+    }
+
     fun setLogTag(theTag: String) {
         log("tagBefore:", tag, "tagNow:", theTag)
         tag = theTag
@@ -63,8 +76,16 @@ object EchoLog {
         logWitheECode(false, tag, *objects)
     }
 
+    fun logWithLevel(level: Int, vararg objects: Any?) {
+        logWitheECodeWithLevel(level, false, tag, *objects)
+    }
+
     fun logDiff(vararg objects: Any?) {
-        logWith(justShowDiffLog = true, objects = *objects)
+        logWith(logLevel, justShowDiffLog = true, objects = *objects)
+    }
+
+    fun logDiffWithLevel(level: Int, vararg objects: Any?) {
+        logWithLevel(level, objects = *objects)
     }
 
 
@@ -103,7 +124,14 @@ object EchoLog {
         if (!enableLog) {
             return
         }
-        logWith(eCode = eCode, TAG = TAG, objects = objects)
+        logWith(logLevel, eCode = eCode, TAG = TAG, objects = objects)
+    }
+
+    fun logWitheECodeWithLevel(level: Int, eCode: Boolean, TAG: String, vararg objects: Any?) {
+        if (!enableLog) {
+            return
+        }
+        logWith(level, eCode = eCode, TAG = TAG, objects = objects)
     }
 
 
@@ -111,7 +139,14 @@ object EchoLog {
         if (!enableLog) {
             return
         }
-        logWith(all = true, objects = objects)
+        logWith(logLevel, all = true, objects = objects)
+    }
+
+    fun logStackTraceWithLevel(level: Int, vararg objects: Any?) {
+        if (!enableLog) {
+            return
+        }
+        logWith(level, all = true, objects = objects)
     }
 
     private var traceCount = 2
@@ -124,6 +159,7 @@ object EchoLog {
      * */
     @OptIn(DelicateCoroutinesApi::class)
     fun logWith(
+        level: Int,
         eCode: Boolean = false,
         TAG: String = tag,
         all: Boolean = false,
@@ -133,9 +169,10 @@ object EchoLog {
         val t = Throwable()
         val th = Thread.currentThread()
         val sb = StringBuilder()
-        GlobalScope.launch {
+        val time = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(Date())
+        GlobalScope.launch(Dispatchers.IO) {
             try {
-                sb.append(" \n╔═══${th.name}:${th.id}════════════════════════════")
+                sb.append(" \n╔═══${th.name}:${th.id}:$time════════════════════════════")
                 var jiantou = "➨"
                 var count = if (all) 100 else traceCount
                 var callstackTrace = ""
@@ -183,10 +220,10 @@ object EchoLog {
                     }
                     beforeLog[callstackTrace] = now
                 }
-                logE(TAG, now)
+                logLongStringWithDiv(level, TAG, now)
             } catch (e: Throwable) {
                 e.printStackTrace()
-                logE(TAG, e.message.toString())
+                logLongStringWithDiv(level, TAG, e.message.toString())
             }
         }
     }
@@ -212,22 +249,29 @@ object EchoLog {
     }
 
 
-    fun logE(TAG: String, msg: String) {
+    fun logLongStringWithDiv(level: Int, TAG: String, msg: String) {
         val strLength = msg.length
         var start = 0
         var end: Int = LOG_MAX_LENGTH
         var i = 0
         while (strLength > end) {
-            _logE(TAG + i, msg.substring(start, end))
+            pLogWithLevel(level, TAG + i, msg.substring(start, end))
             start = end
             end += LOG_MAX_LENGTH
             i++
         }
-        _logE(TAG + i, msg.substring(start, strLength))
+        pLogWithLevel(level, TAG + i, msg.substring(start, strLength))
     }
 
-    private fun _logE(TAG: String, msg: String) {
-        Log.e(TAG, msg)
+    private fun pLogWithLevel(level: Int, TAG: String, msg: String) {
+        when (level) {
+            Log.VERBOSE -> Log.v(TAG, msg)
+            Log.DEBUG -> Log.d(TAG, msg)
+            Log.INFO -> Log.i(TAG, msg)
+            Log.WARN -> Log.w(TAG, msg)
+            Log.ERROR -> Log.e(TAG, msg)
+            else -> Log.v(TAG, msg)
+        }
         logover?.invoke(TAG, msg)
     }
 
