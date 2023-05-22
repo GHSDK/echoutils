@@ -304,14 +304,14 @@ object ShareUtils {
                 EchoUtils.getHttpImageToLocal(it, activity)
             }.also {
                 theUris = it
-                EchoLog.log("getHttpImageToLocal",it)
+                EchoLog.log("getHttpImageToLocal", it)
             }
             //第二步 把path路径的转化为 content
             theUris.mapTo(ArrayList()) {
                 EchoUtils.getContentFilePath(it).toString()
             }.also {
                 theUris = it
-                EchoLog.log("getContentFilePath",it)
+                EchoLog.log("getContentFilePath", it)
             }
             //第三步 把bitmap的保存到相册并取得content 加入uris中
             bitmaps?.forEach { item ->
@@ -322,8 +322,25 @@ object ShareUtils {
                 }
                 EchoLog.log(theUris)
             }
-            justSendShare(activity, title, text, theUris.mapTo(ArrayList()) { Uri.parse(it) })
+            justSendShare(
+                activity,
+                title,
+                text,
+                theUris.mapNotEmptyTo(ArrayList()) { Uri.parse(it) })
         }
+    }
+
+    private inline fun <T, R : Any, C : MutableCollection<in R>> Iterable<T>.mapNotEmptyTo(
+        destination: C,
+        transform: (T) -> R?
+    ): C {
+        forEach { element ->
+            if (element is String && element.isNullOrEmpty()) {
+                return@forEach
+            }
+            transform(element)?.let { destination.add(it) }
+        }
+        return destination
     }
 
     //https://developer.android.com/training/sharing/send
@@ -352,7 +369,6 @@ object ShareUtils {
             putExtra(Intent.EXTRA_TITLE, title)
             if (!uris.isNullList()) {
                 if (uris?.size == 1) {
-                    EchoLog.log("Intent.EXTRA_STREAM, uris[0]",uris[0])
                     putExtra(Intent.EXTRA_STREAM, uris[0])
                 } else {
                     action = Intent.ACTION_SEND_MULTIPLE
@@ -363,7 +379,6 @@ object ShareUtils {
             // (Optional) Here we're passing a content URI to an image to be displayed
             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
         }
-        EchoLog.log(intent.toUri(0),intent.getStringExtra(Intent.EXTRA_STREAM))
         activity.startActivityWithSafe(Intent.createChooser(intent, title))
     }
 
