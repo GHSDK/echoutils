@@ -7,7 +7,7 @@ def gitCommitHash = 'git log  -1 --pretty="%H"'.execute([], pathFile).text.trim(
 def gitLog = new String('git log  -1 --pretty="%s"'.execute([],pathFile).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def branch = new String('git branch --show-current'.execute([], pathFile).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def time = new Date().format("yyyy-MM-dd HH:mm:ss").toString()
-def theVersionCode = '1.1.0'
+def theVersionCode = '1.1.1'
 def theVersionName = 'echo.utils.' + theVersionCode
 android {
     compileSdk 33
@@ -74,7 +74,7 @@ dependencies {
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 ///说明文档
-def DESCRIPTION = '2023/5/19 log分级'
+def DESCRIPTION = '2023/5/22 添加保護'
 def VERSION = theVersionCode
 
 //Executing tasks: [publishMainPublicationToMavenRepository] in project E:\workdata\SDK\Gh_TW\twsdk
@@ -93,9 +93,9 @@ afterEvaluate {
 //            }
 
             //tw也得用
-//            maven {
-//                url = "file://${file("E:/workdata/SDK/Gh_TW/GHSDK_TW_Android").absolutePath}"
-//            }
+            maven {
+                url = "file://${file("E:/workdata/SDK/Gh_TW/GHSDK_TW_Android").absolutePath}"
+            }
             //home TW
 //            maven {
 //                url = "file://${file("J:/workdata/GAME_HOURS_TW_Android/GHSDK_TW_Android").absolutePath}"
@@ -106,13 +106,13 @@ afterEvaluate {
 //            }
 
             //maven  https://issues.sonatype.org/browse/OSSRH-84327?filter=-4
-            maven {
-                url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-                credentials {
-                    username "361170803@qq.com" // ossrhUsername is your sonatype username
-                    password "87nbWq26r%P#!S6" // ossrhUsername is your sonatype password
-                }
-            }
+//            maven {
+//                url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+//                credentials {
+//                    username "361170803@qq.com" // ossrhUsername is your sonatype username
+//                    password "87nbWq26r%P#!S6" // ossrhUsername is your sonatype password
+//                }
+//            }
         }
         publications {
             Main(MavenPublication) {
