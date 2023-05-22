@@ -17,7 +17,11 @@ import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
 import com.facebook.share.Sharer
-import com.facebook.share.model.*
+import com.facebook.share.model.ShareContent
+import com.facebook.share.model.ShareLinkContent
+import com.facebook.share.model.ShareMediaContent
+import com.facebook.share.model.SharePhoto
+import com.facebook.share.model.ShareVideo
 import com.facebook.share.widget.ShareDialog
 import com.twitter.sdk.android.tweetcomposer.TweetComposer
 import com.twitter.sdk.android.tweetcomposer.TweetUploadService
@@ -298,11 +302,17 @@ object ShareUtils {
             //第一步 转化网络图片
             theUris.mapTo(ArrayList()) {
                 EchoUtils.getHttpImageToLocal(it, activity)
-            }.also { theUris = it }
+            }.also {
+                theUris = it
+                EchoLog.log("getHttpImageToLocal",it)
+            }
             //第二步 把path路径的转化为 content
             theUris.mapTo(ArrayList()) {
                 EchoUtils.getContentFilePath(it).toString()
-            }.also { theUris = it }
+            }.also {
+                theUris = it
+                EchoLog.log("getContentFilePath",it)
+            }
             //第三步 把bitmap的保存到相册并取得content 加入uris中
             bitmaps?.forEach { item ->
                 item?.apply {
@@ -310,6 +320,7 @@ object ShareUtils {
                         theUris.add(it)
                     }
                 }
+                EchoLog.log(theUris)
             }
             justSendShare(activity, title, text, theUris.mapTo(ArrayList()) { Uri.parse(it) })
         }
@@ -341,6 +352,7 @@ object ShareUtils {
             putExtra(Intent.EXTRA_TITLE, title)
             if (!uris.isNullList()) {
                 if (uris?.size == 1) {
+                    EchoLog.log("Intent.EXTRA_STREAM, uris[0]",uris[0])
                     putExtra(Intent.EXTRA_STREAM, uris[0])
                 } else {
                     action = Intent.ACTION_SEND_MULTIPLE
@@ -351,7 +363,7 @@ object ShareUtils {
             // (Optional) Here we're passing a content URI to an image to be displayed
             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
         }
-        EchoLog.log(uris)
+        EchoLog.log(intent.toUri(0),intent.getStringExtra(Intent.EXTRA_STREAM))
         activity.startActivityWithSafe(Intent.createChooser(intent, title))
     }
 
@@ -460,12 +472,14 @@ object ShareUtils {
                     val tweetId: Long = intent.getLongExtra(TweetUploadService.EXTRA_TWEET_ID, 0)
                     twShareCallBack?.get()?.onSuccess("")
                 }
+
                 TweetUploadService.UPLOAD_FAILURE -> {
                     // failure
                     val retryIntent: Intent? =
                         intent.getParcelableExtra<Intent>(TweetUploadService.EXTRA_RETRY_INTENT)
                     twShareCallBack?.get()?.onError(null)
                 }
+
                 TweetUploadService.TWEET_COMPOSE_CANCEL -> {
                     // cancel
                     twShareCallBack?.get()?.onCancel()

@@ -79,6 +79,16 @@ object EchoUtils {
      *
      * */
     fun getContentFilePath(thePath: String?): Uri? {
+        try {
+            return tryGetContentFilePath(thePath)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            EchoLog.log(e.message)
+        }
+        return null
+    }
+
+    private fun tryGetContentFilePath(thePath: String?): Uri? {
         if (TextUtils.isEmpty(thePath)) {
             return null
         }
@@ -87,7 +97,7 @@ object EchoUtils {
             return Uri.parse(path)
         }
         val imageFile = File(path)
-        EchoLog.log("imageFile.exists()")
+        EchoLog.log("imageFile.exists()", imageFile.exists())
         val filePath = imageFile.absolutePath;
         val cursor = getApplicationContext().contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -101,15 +111,16 @@ object EchoUtils {
             if (index < 0) {
                 return null
             }
-            val id = cursor.getInt(index);
-            val baseUri = Uri.parse("content://media/external/images/media");
-            return Uri.withAppendedPath(baseUri, "" + id);
+            val id = cursor.getInt(index)
+            val baseUri = Uri.parse("content://media/external/images/media")
+            return Uri.withAppendedPath(baseUri, "" + id)
         } else {
             return if (imageFile.exists()) {
-                val values = ContentValues();
-                values.put(MediaStore.Images.Media.DATA, filePath);
+                EchoLog.log("contentResolver")
+                val values = ContentValues()
+                values.put(MediaStore.Images.Media.DATA, filePath)
                 getApplicationContext().contentResolver
-                    .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                    .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
             } else {
                 null
             }
@@ -502,12 +513,15 @@ fun Fragment.doSetData(any: Any?): Fragment {
         is String -> {
             bundle.putString(DATA_FLAG, any)
         }
+
         is Int -> {
             bundle.putInt(DATA_FLAG, any)
         }
+
         is Boolean -> {
             bundle.putBoolean(DATA_FLAG, any)
         }
+
         else -> {
             bundle.putString(DATA_FLAG, Gson().toJson(any))
         }
@@ -547,14 +561,17 @@ fun <T> Fragment.doGetData(classOfT: Class<T>): T? {
         String::class.javaObjectType -> {
             return arguments?.getString(DATA_FLAG) as T
         }
+
         Int::class.java,
         Int::class.javaObjectType -> {
             return arguments?.getInt(DATA_FLAG) as T
         }
+
         Boolean::class.java,
         Boolean::class.javaObjectType -> {
             return arguments?.getBoolean(DATA_FLAG) as T
         }
+
         else -> {
             return try {
                 val s = arguments?.getString(DATA_FLAG)

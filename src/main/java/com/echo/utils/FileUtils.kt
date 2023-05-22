@@ -11,7 +11,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.io.*
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.FileReader
+import java.io.IOException
+
 
 /**
  * Created by mike.chen on 2017/7/7.
@@ -113,6 +119,7 @@ object FileUtils {
         activity: Activity,
         noGranted: ((Boolean) -> Unit)? = null
     ): String? {
+//        return saveBitmapToExternalCacheDir(bitmap, activity)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             return SystemUtils.saveImageToGallery(activity, bitmap)
         }
@@ -126,6 +133,28 @@ object FileUtils {
     }
 
 
+    fun saveBitmapToExternalCacheDir(bitmap: Bitmap, activity: Activity): String {
+        var bitemapFile = File(
+            activity.externalCacheDir?.absolutePath + File.separator + System.currentTimeMillis()
+                .toString() + ".jpg"
+        )
+        try {
+            // 写入流
+            val fos = FileOutputStream(bitemapFile);
+            // 压缩 参1 格式 参2 100就是不压缩 参3写入流
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+        } catch (e: Throwable) {
+            e.printStackTrace();
+            EchoLog.log(e.message)
+        }
+        bitemapFile.setReadable(true,true)
+        return bitemapFile.absolutePath
+    }
+
+
+    val permissionString =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.READ_MEDIA_IMAGES else Manifest.permission.WRITE_EXTERNAL_STORAGE
+
     /**
      * 索取保存图片权限
      * @return first 是否权限允许，second 当不允许时，用户是否选择了不再询问
@@ -135,7 +164,7 @@ object FileUtils {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
             ContextCompat.checkSelfPermission(
                 activity,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                permissionString
             )
             == PackageManager.PERMISSION_GRANTED
         ) {
@@ -147,7 +176,7 @@ object FileUtils {
                     this.hashCode().toString(), ActivityResultContracts.RequestPermission()
                 ) { isOk ->
                     it.resumeWith(Result.success(isOk))
-                }.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                }.launch(permissionString)
             } else {
                 EmptyFragmentActivity.invoke(
                     activity, { appCompatActivity ->
@@ -155,7 +184,7 @@ object FileUtils {
                         appCompatActivity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isOk ->
                             it.resumeWith(Result.success(isOk))
                             appCompatActivity.finish()
-                        }.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        }.launch(permissionString)
                     }
                 )
             }
@@ -164,7 +193,7 @@ object FileUtils {
             val shouldShowRequestPermissionRationale =
                 ActivityCompat.shouldShowRequestPermissionRationale(
                     activity,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    permissionString
                 )
             return Pair(false, shouldShowRequestPermissionRationale)
         }

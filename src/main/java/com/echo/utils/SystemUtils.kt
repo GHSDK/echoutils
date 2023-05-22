@@ -21,6 +21,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.echo.utils.EchoLog.log
+import com.echo.utils.FileUtils.permissionString
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
@@ -55,7 +56,7 @@ object SystemUtils {
         requestCode: Int
     ): Boolean {
         val permissions = arrayOf(
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            permissionString,
             Manifest.permission.RECORD_AUDIO
         )
         return checkPermissions(activity, fragment, permissions, requestCode)
