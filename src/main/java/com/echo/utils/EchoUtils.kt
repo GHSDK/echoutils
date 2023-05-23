@@ -3,7 +3,6 @@ package com.echo.utils
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentResolver
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
@@ -23,6 +22,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -78,17 +78,8 @@ object EchoUtils {
      * 网络图片不处理
      *
      * */
-    fun getContentFilePath(thePath: String?): Uri? {
-        try {
-            return tryGetContentFilePath(thePath)
-        } catch (e: Throwable) {
-            e.printStackTrace()
-            EchoLog.log(e.message)
-        }
-        return null
-    }
-
-    private fun tryGetContentFilePath(thePath: String?): Uri? {
+    suspend fun getContentFilePath(activity: Activity, thePath: String?): Uri? {
+        EchoLog.log("tryGetContentFilePath", activity, thePath)
         if (TextUtils.isEmpty(thePath)) {
             return null
         }
@@ -98,35 +89,11 @@ object EchoUtils {
         }
         val imageFile = File(path)
         EchoLog.log("imageFile.exists()", imageFile.exists())
-        val filePath = imageFile.absolutePath;
-        val cursor = getApplicationContext().contentResolver.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            arrayOf(MediaStore.Images.Media._ID), MediaStore.Images.Media.DATA + "=? ",
-            arrayOf(filePath), null
-        )
-        EchoLog.log(cursor)
-        if (cursor != null && cursor.moveToFirst()) {
-            val index = cursor.getColumnIndex(MediaStore.MediaColumns._ID)
-            EchoLog.log("index:", index)
-            if (index < 0) {
-                return null
-            }
-            val id = cursor.getInt(index)
-            val baseUri = Uri.parse("content://media/external/images/media")
-            return Uri.withAppendedPath(baseUri, "" + id)
-        } else {
-            return if (imageFile.exists()) {
-                EchoLog.log("contentResolver")
-                val values = ContentValues()
-                values.put(MediaStore.Images.Media.DATA, filePath)
-                getApplicationContext().contentResolver
-                    .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-            } else {
-                null
-            }
+        if (!imageFile.exists()) {
+            return null
         }
+        return FileUtils.saveBitmap(BitmapFactory.decodeFile(thePath), activity)?.toUri()
     }
-
 
     /**
      * 将content类型地址，转化为path
@@ -136,6 +103,16 @@ object EchoUtils {
      *目前发现id和_display_name可以用，就用_display_name
      */
     fun getRealFilePath(uri: Uri): String? {
+        try {
+            return pGetRealFilePath(uri)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            EchoLog.log(e.message)
+        }
+        return null
+    }
+
+    private fun pGetRealFilePath(uri: Uri): String? {
         val scheme = uri.scheme
         var data: String? = null
         if (scheme == null) data = uri.path else if (ContentResolver.SCHEME_FILE == scheme) {

@@ -119,7 +119,6 @@ object FileUtils {
         activity: Activity,
         noGranted: ((Boolean) -> Unit)? = null
     ): String? {
-//        return saveBitmapToExternalCacheDir(bitmap, activity)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             return SystemUtils.saveImageToGallery(activity, bitmap)
         }
