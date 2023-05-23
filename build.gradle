@@ -7,7 +7,7 @@ def gitCommitHash = 'git log  -1 --pretty="%H"'.execute([], pathFile).text.trim(
 def gitLog = new String('git log  -1 --pretty="%s"'.execute([],pathFile).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def branch = new String('git branch --show-current'.execute([], pathFile).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def time = new Date().format("yyyy-MM-dd HH:mm:ss").toString()
-def theVersionCode = '1.1.1'
+def theVersionCode = '1.1.2'
 def theVersionName = 'echo.utils.' + theVersionCode
 android {
     compileSdk 33
