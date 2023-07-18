@@ -6,9 +6,6 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -20,7 +17,6 @@ import java.util.Locale
  * describe :
  */
 object EchoLog {
-
 
     private var logLevel = Log.VERBOSE
 
@@ -170,62 +166,61 @@ object EchoLog {
         val th = Thread.currentThread()
         val sb = StringBuilder()
         val time = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(Date())
-        GlobalScope.launch(Dispatchers.IO) {
-            try {
-                sb.append(" \n╔═══${th.name}:${th.id}:$time════════════════════════════")
-                var jiantou = "➨"
-                var count = if (all) 100 else traceCount
-                var callstackTrace = ""
-                out@ for (traceElement1 in t.stackTrace) {
-                    if (count <= 0) {
-                        break
-                    }
-                    for (a in 0 until ignore.size) {
-                        if (traceElement1.toString().contains(ignore[a])) {
-                            continue@out
-                        }
-                    }
-                    callstackTrace.isNullAndDo {
-                        callstackTrace = traceElement1.toString()
-                    }
-                    count--
-                    jiantou = "$jiantou➨"
-                    sb.append("\n║")
-                    sb.append(jiantou)
-                    sb.append("at ")
-                    sb.append(traceElement1)
+        try {
+            sb.append(" \n╔═══${th.name}:${th.id}:$time════════════════════════════")
+            var jiantou = "➨"
+            var count = if (all) 100 else traceCount
+            var callstackTrace = ""
+            out@ for (traceElement1 in t.stackTrace) {
+                if (count <= 0) {
+                    break
                 }
-                sb.append("\n╟───────────────────────────────────\n")
-                sb.append("║")
-                for (o in objects) {
-                    if (o != null) {
-                        var s = o.toMyString()
-                        if (o is Map<*, *>) {
-                            s = o.toMapString()
-                        }
-                        if (eCode) {
-                            s = EncryptDES.eCode(s)
-                        }
-                        sb.append(s.replace("\n".toRegex(), "\n║"))
-                    } else {
-                        sb.append("null")
+                for (a in 0 until ignore.size) {
+                    if (traceElement1.toString().contains(ignore[a])) {
+                        continue@out
                     }
-                    sb.append("___")
                 }
-                sb.append("\n╚═════════════════════════════════")
-                val now = sb.toMyString()
-                if (justShowDiffLog) {
-                    if (beforeLog[callstackTrace] == now) {
-                        return@launch
-                    }
-                    beforeLog[callstackTrace] = now
+                callstackTrace.isNullAndDo {
+                    callstackTrace = traceElement1.toString()
                 }
-                logLongStringWithDiv(level, TAG, now)
-            } catch (e: Throwable) {
-                e.printStackTrace()
-                logLongStringWithDiv(level, TAG, e.message.toString())
+                count--
+                jiantou = "$jiantou➨"
+                sb.append("\n║")
+                sb.append(jiantou)
+                sb.append("at ")
+                sb.append(traceElement1)
             }
+            sb.append("\n╟───────────────────────────────────\n")
+            sb.append("║")
+            for (o in objects) {
+                if (o != null) {
+                    var s = o.toMyString()
+                    if (o is Map<*, *>) {
+                        s = o.toMapString()
+                    }
+                    if (eCode) {
+                        s = EncryptDES.eCode(s)
+                    }
+                    sb.append(s.replace("\n".toRegex(), "\n║"))
+                } else {
+                    sb.append("null")
+                }
+                sb.append("___")
+            }
+            sb.append("\n╚═════════════════════════════════")
+            val now = sb.toMyString()
+            if (justShowDiffLog) {
+                if (beforeLog[callstackTrace] == now) {
+                    return
+                }
+                beforeLog[callstackTrace] = now
+            }
+            logLongStringWithDiv(level, TAG, now)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            logLongStringWithDiv(level, TAG, e.message.toString())
         }
+
     }
 
     private fun getString(eCode: Boolean, vararg objects: Any?): String {

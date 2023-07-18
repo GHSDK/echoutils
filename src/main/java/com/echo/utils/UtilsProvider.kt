@@ -2,6 +2,7 @@ package com.echo.utils
 
 import android.content.ContentProvider
 import android.content.ContentValues
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
@@ -13,10 +14,31 @@ import android.os.Build
  * describe :
  */
 class UtilsProvider : ContentProvider() {
+    /**设置tag*/
+    val TAG = "com.echo.utils.tag"
+
+    /**
+     * 默认的宽度
+     * */
+    val defaultWithDp = "com.echo.utils.defaultWithDp"
+
+    /**默认的高度
+     * */
+    val defaultHeightDp = "com.echo.utils.defaultHeightDp"
     override fun onCreate(): Boolean {
         context?.applicationContext?.apply {
-            EchoLog.setLogTag(getString(R.string.echo_log_tag))
-            EchoLog.log(applicationInfo.metaData)
+            try {
+                packageManager.getApplicationInfo(
+                    packageName, PackageManager.GET_META_DATA
+                ).metaData?.apply {
+                    getString(TAG)?.apply {
+                        EchoLog.setLogTag(this)
+                    }
+                    UiConfig.setDefaultWH(getInt(defaultWithDp) , getInt(defaultHeightDp) )
+                }
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
             EchoUtils.context = this
             UiConfig.init(this)
         }

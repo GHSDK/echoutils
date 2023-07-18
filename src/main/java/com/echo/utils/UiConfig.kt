@@ -72,10 +72,24 @@ object UiConfig {
 
     // 1080*160/360  默认的布局都是按360dp宽640dp高来的，如果密度不同，dp就需要缩放
     // 1080*160/360  默认的布局都是按360dp宽640dp高来的，如果密度不同，dp就需要缩放
-    private const val defaultHeightDp = 640f
-    private const val defaultWithDp = 360f
+    private var defaultHeightDp = 640f
+    private var defaultWithDp = 360f
     var dpScaling = 1f
     var density = 3f
+
+
+    fun setDefaultWH(with: Int, height: Int) {
+        if (with <= 0) {
+            return
+        }
+        defaultWithDp = with.toFloat()
+        defaultHeightDp = if (height <= 0) {
+            defaultWithDp * 640 / 360
+        } else {
+            height.toFloat()
+        }
+        EchoLog.log("before", defaultWithDp, defaultHeightDp, "now", with, height)
+    }
 
     fun init(context: Context) {
         context.resources.displayMetrics.apply {
