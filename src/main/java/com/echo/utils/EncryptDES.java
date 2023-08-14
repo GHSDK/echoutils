@@ -50,10 +50,22 @@ public class EncryptDES {
         }
     }
 
+    /**
+     * 加密
+     *
+     * @param string 入参
+     * @return 加密结果
+     */
     public static String eCode(String string) {
         return defaultEncryptDES.encrypt(string);
     }
 
+    /**
+     * 解密
+     *
+     * @param string 入参
+     * @return 解密结果
+     */
     public static String dCode(String string) {
         return defaultEncryptDES.decrypt(string);
     }
@@ -110,7 +122,7 @@ public class EncryptDES {
      *
      * @param arrB 需加密的字节数组
      * @return 加密后的字节数组
-     * @throws Exception  BadPaddingException, IllegalBlockSizeException
+     * @throws Exception BadPaddingException, IllegalBlockSizeException
      */
     public byte[] encrypt(byte[] arrB) throws Exception {
         return encryptCipher.doFinal(arrB);
@@ -139,7 +151,7 @@ public class EncryptDES {
      *
      * @param arrB 需解密的字节数组
      * @return 解密后的字节数组
-     *  @throws Exception  BadPaddingException, IllegalBlockSizeException
+     * @throws Exception BadPaddingException, IllegalBlockSizeException
      */
     public byte[] decrypt(byte[] arrB) throws Exception {
         return decryptCipher.doFinal(arrB);
@@ -180,7 +192,6 @@ public class EncryptDES {
         Key key = new javax.crypto.spec.SecretKeySpec(arrB, "DES");
         return key;
     }
-
 
 
 }
