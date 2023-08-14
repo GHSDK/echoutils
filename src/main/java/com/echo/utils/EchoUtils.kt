@@ -9,9 +9,11 @@ import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.ImageDecoder
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -110,6 +112,18 @@ object EchoUtils {
             EchoLog.log(e.message)
         }
         return null
+    }
+
+    fun getImage(uri: Uri): Bitmap? {
+        return if (Build.VERSION.SDK_INT < 28) {
+            MediaStore.Images.Media.getBitmap(
+                getApplicationContext().contentResolver,
+                uri
+            )
+        } else {
+            val source = ImageDecoder.createSource(getApplicationContext().contentResolver, uri)
+            ImageDecoder.decodeBitmap(source)
+        }
     }
 
     private fun pGetRealFilePath(uri: Uri): String? {
