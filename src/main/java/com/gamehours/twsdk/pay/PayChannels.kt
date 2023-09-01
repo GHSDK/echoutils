@@ -1,10 +1,10 @@
-package com.echo.utils.pay;
+package com.gamehours.twsdk.pay
 
 
 import android.app.Activity
 import com.echo.utils.EchoLog
 import com.echo.utils.StateCallBack
-import com.echo.utils.pay.IPayChannel.PayBean
+
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -76,7 +76,7 @@ class PayChannels private constructor() {
         dfChannel = channels[channelName] ?: dfChannel
     }
 
-    fun pay(activity: Activity, payBean: PayBean, callBack: PayCallBack) {
+    fun pay(activity: Activity, payBean: IPayChannel.PayBean, callBack: PayCallBack) {
         PayData.getInstance().save(payBean.initUUID())
         this.callBack = callBack
         dfChannel?.launchPurchaseFlow(activity, payBean)

@@ -1,4 +1,4 @@
-package com.echo.utils.pay
+package com.gamehours.twsdk.pay
 
 import android.app.Activity
 import com.echo.utils.StateCallBack
@@ -11,7 +11,7 @@ import java.util.UUID
  * author   : dongjunjie.mail@qq.com
  * time     : 2020/9/7
  * change   :
- * describe :
+ * describe : 考虑到本身
  */
 interface IPayChannel  {
     //重启的时候需要查询上传的支付情况，并确定消费
@@ -113,6 +113,11 @@ interface IPayChannel  {
         var introductoryPriceCycles: String? = null
     }
 
+    fun PayBean.makePurchase():PurchaseData{
+        val rt=PurchaseData().setPayBean(this)
+        rt.productId=productId
+        return  rt
+    }
     class PayBean {
         ///服务器代码 后端记帐用 必须
         @SerializedName("serverCode")
@@ -243,7 +248,7 @@ interface IPayChannel  {
         fun onPaySuccess(purchaseData: PurchaseData)
 
         ///第三方支付失败 eg ：Google
-        fun onPayFail(responseMessage: ResponseMessage)
+        fun onPayFail(responseMessage: ResponseMessage,purchaseData: PurchaseData?)
 
         ///支付成功后确认消费成功
         fun onConsumeSuccess(purchaseData: PurchaseData)
@@ -252,10 +257,10 @@ interface IPayChannel  {
         fun onConsumeFail(purchaseData: PurchaseData)
 
         ///支付取消
-        fun payCancel()
+        fun payCancel(purchaseData: PurchaseData?)
 
         ///支付结束（不一定是成功，代表调用支付整个流程结束）
-        fun payEnd()
+        fun payEnd(purchaseData: PurchaseData?)
     }
 
 

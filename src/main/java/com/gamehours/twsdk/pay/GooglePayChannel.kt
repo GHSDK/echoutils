@@ -1,4 +1,4 @@
-package com.echo.utils.pay
+package com.gamehours.twsdk.pay
 
 import android.app.Activity
 import android.content.Context
@@ -16,9 +16,10 @@ import com.android.billingclient.api.QueryPurchasesParams
 import com.echo.utils.DataCallBack
 import com.echo.utils.EchoLog
 import com.echo.utils.StateCallBack
+import com.echo.utils.forEachNotNull
 import com.echo.utils.isNullList
-import com.echo.utils.pay.IPayChannel.ProductInfo
-import com.echo.utils.pay.IPayChannel.ThirdPayStateCallBack
+import com.gamehours.twsdk.pay.IPayChannel.ProductInfo
+import com.gamehours.twsdk.pay.IPayChannel.ThirdPayStateCallBack
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -82,18 +83,32 @@ class GooglePayChannel(
         )
         when (billingResult.responseCode) {
             BillingClient.BillingResponseCode.OK -> {
-                rawPurchases?.forEach { handlePurchase(it) }
+                rawPurchases?.forEachNotNull { handlePurchase(it) }
             }
 
-            BillingClient.BillingResponseCode.USER_CANCELED -> payCallBack.payCancel()
-            else -> payCallBack.onPayFail(
-                ResponseMessage.error(
-                    billingResult.responseCode,
-                    "billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK"
-                )
-            )
+            BillingClient.BillingResponseCode.USER_CANCELED -> {
+                rawPurchases?.forEachNotNull { payCallBack.payCancel(it.makePurchase()) }
+            }
+
+            else -> {
+                rawPurchases?.forEachNotNull {
+                    payCallBack.onPayFail(
+                        ResponseMessage.error(
+                            billingResult.responseCode,
+                            "billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK"
+                        ),
+                        it.makePurchase()
+                    )
+                }
+            }
+
         }
     }
+
+    fun Purchase?.makePurchase(): PurchaseData? {
+        return if (this != null) makePurchase(this) else null
+    }
+
 
     private fun makePurchase(purchase: Purchase): PurchaseData {
         val rt = PurchaseData().apply {
@@ -108,12 +123,7 @@ class GooglePayChannel(
         return rt
     }
 
-    private fun handlePurchase(purchase: Purchase?) {
-        if (purchase == null) {
-            EchoLog.log("purchase==null")
-            payCallBack.onPayFail(ResponseMessage.error(1, "purchase == null"))
-            return
-        }
+    private fun handlePurchase(purchase: Purchase) {
         EchoLog.log(purchase)
         if (!Security.verifyPurchase(
                 publicKey,
@@ -125,7 +135,8 @@ class GooglePayChannel(
                 ResponseMessage.error(
                     1,
                     "Purchase failed Not allowed to make the payment"
-                )
+                ),
+                purchase.makePurchase()
             )
             return
         }
@@ -134,7 +145,8 @@ class GooglePayChannel(
                 ResponseMessage.error(
                     purchase.purchaseState,
                     "purchase.getPurchaseState() != Purchase.PurchaseState.PURCHASED"
-                )
+                ),
+                purchase.makePurchase()
             )
             return
         }
@@ -162,7 +174,7 @@ class GooglePayChannel(
                     object : StateCallBack<List<ProductDetails>> {
                         override fun onError(error: ResponseMessage) {
                             EchoLog.log(error.message)
-                            payCallBack.onPayFail(error)
+                            payCallBack.onPayFail(error, payBean.makePurchase())
                         }
 
                         override fun onSuccess(data: List<ProductDetails>) {
@@ -186,7 +198,9 @@ class GooglePayChannel(
                             billingClient.launchBillingFlow(activity, billingFlowParams)
                         }
                     })
-            }, payCallBack::onPayFail
+            }, {
+                payCallBack.onPayFail(it, payBean.makePurchase())
+            }
         )
     }
 
@@ -261,7 +275,7 @@ class GooglePayChannel(
     private fun consumeAsync(purchase: Purchase) {
         EchoLog.log(purchase)
         if (purchase.isAcknowledged) {
-            payCallBack.payEnd()
+            payCallBack.payEnd(purchase.makePurchase())
             return
         }
         val purchaseToken = purchase.purchaseToken
@@ -294,7 +308,7 @@ class GooglePayChannel(
     private fun acknowledgePurchase(purchase: Purchase) {
         EchoLog.log(purchase)
         if (purchase.isAcknowledged) {
-            payCallBack.payEnd()
+            payCallBack.payEnd(purchase.makePurchase())
             return
         }
         executeServiceRequest(
@@ -312,7 +326,9 @@ class GooglePayChannel(
                         payCallBack.onConsumeFail(makePurchase(purchase))
                     }
                 }
-            }, payCallBack::onPayFail
+            }, {
+                payCallBack.onPayFail(it, purchase.makePurchase())
+            }
         )
     }
 

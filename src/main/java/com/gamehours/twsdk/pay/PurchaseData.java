@@ -1,4 +1,5 @@
-package com.echo.utils.pay;
+package com.gamehours.twsdk.pay;
+
 
 import com.google.gson.annotations.SerializedName;
 
