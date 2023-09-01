@@ -68,6 +68,9 @@ dependencies {
     compileOnly 'com.facebook.android:facebook-share:13.0.0'
     //tw分享
     compileOnly 'com.twitter.sdk.android:twitter:3.3.0'
+
+    ///google 支付渠道
+    compileOnly 'com.android.billingclient:billing:6.0.1'
 }
 
 //***************************** 打包发布 *****************************************
