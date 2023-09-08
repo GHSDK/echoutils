@@ -1,4 +1,4 @@
-package com.gamehours.twsdk.pay;
+package com.echo.utils.pay;
 
 import android.text.TextUtils;
 import android.util.Base64;

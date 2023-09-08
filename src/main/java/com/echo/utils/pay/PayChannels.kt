@@ -1,9 +1,8 @@
-package com.gamehours.twsdk.pay
+package com.echo.utils.pay
 
 
 import android.app.Activity
 import com.echo.utils.EchoLog
-import com.echo.utils.StateCallBack
 
 
 /**

@@ -1,11 +1,12 @@
-package com.gamehours.twsdk.pay;
+package com.echo.utils.pay;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 
+
 import com.echo.utils.EchoUtils;
- import com.google.gson.Gson;
+import com.google.gson.Gson;
 
 /**
  * author   : dongjunjie.mail@qq.com

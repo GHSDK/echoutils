@@ -1,4 +1,4 @@
-package com.gamehours.twsdk.pay
+package com.echo.utils.pay
 
 import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName

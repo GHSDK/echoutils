@@ -1,7 +1,7 @@
-package com.echo.utils
+package com.echo.utils.pay
 
 import com.echo.utils.EchoLog.log
-import com.echo.utils.pay.ResponseMessage
+
 
 /**
  * author   : dongjunjie.mail@qq.com

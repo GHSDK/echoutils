@@ -1,4 +1,4 @@
-package com.gamehours.twsdk.pay
+package com.echo.utils.pay
 
 import android.app.Activity
 import android.content.Context
@@ -15,11 +15,11 @@ import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import com.echo.utils.DataCallBack
 import com.echo.utils.EchoLog
-import com.echo.utils.StateCallBack
 import com.echo.utils.forEachNotNull
 import com.echo.utils.isNullList
-import com.gamehours.twsdk.pay.IPayChannel.ProductInfo
-import com.gamehours.twsdk.pay.IPayChannel.ThirdPayStateCallBack
+import com.echo.utils.pay.IPayChannel.ProductInfo
+import com.echo.utils.pay.IPayChannel.ThirdPayStateCallBack
+
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -106,11 +106,11 @@ class GooglePayChannel(
     }
 
     fun Purchase?.makePurchase(): PurchaseData? {
-        return if (this != null) makePurchase(this) else null
+        return if (this != null) pMakePurchase(this) else null
     }
 
 
-    private fun makePurchase(purchase: Purchase): PurchaseData {
+    private fun pMakePurchase(purchase: Purchase): PurchaseData {
         val rt = PurchaseData().apply {
             productId = purchase.products[0]
             orderId = purchase.orderId
@@ -150,7 +150,7 @@ class GooglePayChannel(
             )
             return
         }
-        val purchaseData = makePurchase(purchase)
+        val purchaseData = pMakePurchase(purchase)
         payCallBack.onPaySuccess(purchaseData)
         EchoLog.log("Signature:" + purchase.signature)
         if (purchaseData.getPayBean() != null && purchaseData.getPayBean().acknowledgePurchase()) {
@@ -279,7 +279,7 @@ class GooglePayChannel(
             return
         }
         val purchaseToken = purchase.purchaseToken
-        val purchaseData = makePurchase(purchase)
+        val purchaseData = pMakePurchase(purchase)
         executeServiceRequest(
             {
                 billingClient.consumeAsync(
@@ -321,9 +321,9 @@ class GooglePayChannel(
                     EchoLog.log("billingResult:" + it.responseCode)
                     if (it.responseCode == BillingClient.BillingResponseCode.OK) {
                         EchoLog.log("consumeAsync response:" + purchase.purchaseToken)
-                        payCallBack.onConsumeSuccess(makePurchase(purchase))
+                        payCallBack.onConsumeSuccess(pMakePurchase(purchase))
                     } else {
-                        payCallBack.onConsumeFail(makePurchase(purchase))
+                        payCallBack.onConsumeFail(pMakePurchase(purchase))
                     }
                 }
             }, {

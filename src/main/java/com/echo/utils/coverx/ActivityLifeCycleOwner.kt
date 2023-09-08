@@ -27,14 +27,12 @@ class ActivityLifeCycleOwner(private val theActivity: Activity) : LifecycleOwner
     private val mSavedStateRegistryController = SavedStateRegistryController.create(this)
     private val lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
 
+    override val lifecycle: Lifecycle
+        get() = lifecycleRegistry
+    override val savedStateRegistry: SavedStateRegistry
+        get() = mSavedStateRegistryController.savedStateRegistry
 
-    override fun getLifecycle(): Lifecycle {
-        return lifecycleRegistry
-    }
 
-    override fun getSavedStateRegistry(): SavedStateRegistry {
-        return mSavedStateRegistryController.savedStateRegistry
-    }
 
     init {
         theActivity.runOnUiThread {
@@ -110,6 +108,7 @@ class ActivityLifeCycleOwner(private val theActivity: Activity) : LifecycleOwner
             return ActivityLifeCycleOwner(activity).lifecycle
         }
     }
+
 
 
 }

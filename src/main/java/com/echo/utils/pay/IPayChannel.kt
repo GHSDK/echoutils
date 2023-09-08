@@ -1,7 +1,6 @@
-package com.gamehours.twsdk.pay
+package com.echo.utils.pay
 
 import android.app.Activity
-import com.echo.utils.StateCallBack
 import com.google.gson.annotations.SerializedName
 import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy

@@ -7,7 +7,7 @@ def gitCommitHash = 'git log  -1 --pretty="%H"'.execute([], pathFile).text.trim(
 def gitLog = new String('git log  -1 --pretty="%s"'.execute([],pathFile).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def branch = new String('git branch --show-current'.execute([], pathFile).text.trim().replaceAll("\n", "").getBytes(), "utf-8")
 def time = new Date().format("yyyy-MM-dd HH:mm:ss").toString()
-def theVersionCode = '1.2.0'
+def theVersionCode = '1.2.1'
 def theVersionName = 'echo.utils.' + theVersionCode
 android {
     compileSdk 33
@@ -126,22 +126,22 @@ afterEvaluate {
                 artifactId = 'echoutils'
                 version = VERSION
 
-                task androidJavadocs(type: Javadoc) {
-                    source = android.sourceSets.main.java.source
-                    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-                    excludes = ['**/*.kt']
-                }
-                task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-                    classifier = 'javadoc'
-                    from androidJavadocs.destinationDir
-                }
+//                task androidJavadocs(type: Javadoc) {
+//                    source = android.sourceSets.main.java.source
+//                    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+//                    excludes = ['**/*.kt']
+//                }
+//                task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+//                    classifier = 'javadoc'
+//                    from androidJavadocs.destinationDir
+//                }
 
                 task androidSourcesJar(type: Jar) {
                     classifier = 'sources'
                     from android.sourceSets.main.java.source
                 }
                 artifact(androidSourcesJar)
-                artifact(androidJavadocsJar)
+//                artifact(androidJavadocsJar)
                 pom {
                     description = DESCRIPTION
                     name = 'ECHO UTILS'
