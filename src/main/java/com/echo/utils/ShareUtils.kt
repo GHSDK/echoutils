@@ -366,7 +366,7 @@ object ShareUtils {
             if ((uris?.size ?: 0) > 1) {
                 action = Intent.ACTION_SEND_MULTIPLE
             }
-            type = "text/*"
+            type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, text)
             // (Optional) Here we're setting the title of the content
             putExtra(Intent.EXTRA_TITLE, title)
