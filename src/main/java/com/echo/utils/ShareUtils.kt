@@ -2,10 +2,8 @@ package com.echo.utils
 
 
 import android.app.Activity
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.text.TextUtils
@@ -23,11 +21,7 @@ import com.facebook.share.model.ShareMediaContent
 import com.facebook.share.model.SharePhoto
 import com.facebook.share.model.ShareVideo
 import com.facebook.share.widget.ShareDialog
-import com.twitter.sdk.android.tweetcomposer.TweetComposer
-import com.twitter.sdk.android.tweetcomposer.TweetUploadService
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.lang.ref.WeakReference
-import java.net.URL
 
 /**
  * author   : dongjunjie.mail@qq.com
@@ -393,117 +387,4 @@ object ShareUtils {
     }
 
 
-    const val TWITTER = "com.twitter.android"
-    const val TWITTER_POS = "com.twitter.composer.ComposerActivity"
-
-    fun twShareAlbumImage(
-        activity: Activity,
-        content: String?,
-        url: String?,
-        callback: ShareCallBack?
-    ) {
-        activity.launch {
-            val image = pickerImage(activity).getSafeItem(0).toMyString()
-            twShare(activity, content, image, url, null, callback)
-        }
-    }
-
-    //https://github.com/twitter-archive/twitter-kit-android/wiki/Compose-Tweets#launching-twitter-composer
-    fun twShare(
-        activity: Activity,
-        content: String?,
-        imageUri: String?,
-        url: String?,
-        bitmap: Bitmap?,
-        callback: ShareCallBack?
-    ) {
-        EchoLog.log("twShare", content, imageUri, url, callback)
-        activity.launch {
-            var tempUrl = imageUri
-            bitmap?.apply {
-                FileUtils.saveBitmap(this, activity).isNotEmptyAndDo {
-                    tempUrl = it
-                }
-            }
-            tempUrl = EchoUtils.getHttpImageToLocal(tempUrl ?: "", activity)
-            tempUrl = EchoUtils.getContentFilePath(activity, tempUrl ?: "").toString()
-            twShare(activity, content, Uri.parse(tempUrl), url, callback)
-        }
-    }
-
-    private fun twShare(
-        activity: Activity,
-        content: String?,
-        imageUri: Uri?,
-        url: String?,
-        callback: ShareCallBack?
-    ) {
-        EchoLog.log("twShare", content, imageUri, url, callback)
-        twShareCallBack = WeakReference(callback)
-        var empty = true
-        val builder = TweetComposer.Builder(activity).apply {
-            if (!TextUtils.isEmpty(content)) {
-                text(content)
-                empty = false
-            }
-            imageUri?.apply {
-                EchoLog.log("twShare", "uri", this)
-                image(this)
-                empty = false
-            }
-            if (!TextUtils.isEmpty(url)) {
-                url(URL(url))
-                empty = false
-            }
-        }
-        if (empty) {
-            return
-        }
-        builder.createIntent().apply {
-            EchoUtils.printIntent(this)
-            try {
-                activity.packageManager.getPackageInfo(
-                    TWITTER,
-                    PackageManager.GET_ACTIVITIES
-                )?.activities?.forEach {
-                    if (it.name == TWITTER_POS) {
-                        setClassName(TWITTER, TWITTER_POS)
-                        return@forEach
-                    }
-                }
-            } catch (e: Throwable) {
-                e.printStackTrace()
-                EchoLog.log(e.message)
-            }
-            //默认分享发推
-            activity.startActivityWithSafe(this)
-        }
-    }
-
-    var twShareCallBack: WeakReference<ShareCallBack?>? = null
-
-    class MyResultReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent) {
-            when (intent.action) {
-                TweetUploadService.UPLOAD_SUCCESS -> {
-                    // success
-                    val tweetId: Long = intent.getLongExtra(TweetUploadService.EXTRA_TWEET_ID, 0)
-                    twShareCallBack?.get()?.onSuccess("")
-                }
-
-                TweetUploadService.UPLOAD_FAILURE -> {
-                    // failure
-                    val retryIntent: Intent? =
-                        intent.getParcelableExtra<Intent>(TweetUploadService.EXTRA_RETRY_INTENT)
-                    twShareCallBack?.get()?.onError(null)
-                }
-
-                TweetUploadService.TWEET_COMPOSE_CANCEL -> {
-                    // cancel
-                    twShareCallBack?.get()?.onCancel()
-                }
-            }
-            twShareCallBack = null
-        }
-    }
 }
